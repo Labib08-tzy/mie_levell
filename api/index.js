@@ -311,6 +311,9 @@ function baseHead(title) {
       ::-webkit-scrollbar-track { background: transparent; }
       ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
       ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
     </style>
   `;
 }
@@ -495,7 +498,7 @@ function dashboardPage(user) {
   const products = [
     {
       id: "mie-gacoan",
-      name: "Mie Gacoan",
+      name: "Mie Gacor",
       category: "mie",
       subtitle: "Pedas Asin Gurih",
       desc: "Mie pedas gurih pilihan bertabur daging ayam cincang gurih dan pangsit renyah.",
@@ -696,7 +699,7 @@ function dashboardPage(user) {
       <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
         <div class="relative w-full">
           <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-search text-xs"></i></span>
-          <input type="text" id="searchInputNav" onkeyup="filterMenuSearch(this.value)" placeholder="Cari Mie Gacoan, Udang Keju, Es Teh..." class="w-full pl-9 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-[14px] focus:bg-white focus:border-orange-500 focus:outline-none transition-all" />
+          <input type="text" id="searchInputNav" onkeyup="filterMenuSearch(this.value)" placeholder="Cari Mie Gacor, Udang Keju, Es Teh..." class="w-full pl-9 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-[14px] focus:bg-white focus:border-orange-500 focus:outline-none transition-all" />
         </div>
       </div>
 
@@ -796,7 +799,7 @@ function dashboardPage(user) {
           <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
           <div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-3.5 rounded-[16px] border border-white/40 shadow-sm flex items-center justify-between">
             <div>
-              <p class="text-xs font-bold text-slate-900">Mie Gacoan Original</p>
+              <p class="text-xs font-bold text-slate-900">Mie Gacor Original</p>
               <p class="text-[11px] text-orange-600 font-semibold">Menu Terpopuler Hari Ini</p>
             </div>
             <span class="text-xs font-bold text-slate-900 bg-orange-50 px-2.5 py-1 rounded-full text-orange-600">Rp 14.000</span>
@@ -835,23 +838,27 @@ function dashboardPage(user) {
   </div>
 
   <!-- Category Tabs -->
-  <div class="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none mb-8">
-    <button onclick="setCategoryFilter('all')" id="tab-all" class="category-tab active px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all shadow-sm bg-orange-500 text-white flex-shrink-0">
-      Semua Menu
+  <div class="flex items-center gap-2.5 overflow-x-auto no-scrollbar py-2 px-1 mb-8 flex-nowrap whitespace-nowrap scroll-smooth snap-x snap-mandatory touch-pan-x">
+    <button onclick="setCategoryFilter('all')" id="tab-all" class="category-tab active px-4 sm:px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all flex-shrink-0 snap-start flex items-center gap-2 cursor-pointer bg-orange-500 text-white shadow-md shadow-orange-500/20 border border-orange-500 hover:bg-orange-600 hover:text-white">
+      <i class="fas fa-border-all text-xs"></i>
+      <span>Semua Menu</span>
     </button>
-    <button onclick="setCategoryFilter('mie')" id="tab-mie" class="category-tab px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-500 flex-shrink-0">
-      Mie Pedas
+    <button onclick="setCategoryFilter('mie')" id="tab-mie" class="category-tab px-4 sm:px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all flex-shrink-0 snap-start flex items-center gap-2 cursor-pointer bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-600 hover:bg-orange-50">
+      <i class="fas fa-fire text-xs text-orange-500"></i>
+      <span>Mie Pedas</span>
     </button>
-    <button onclick="setCategoryFilter('dimsum')" id="tab-dimsum" class="category-tab px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-500 flex-shrink-0">
-      Dimsum & Cemilan
+    <button onclick="setCategoryFilter('dimsum')" id="tab-dimsum" class="category-tab px-4 sm:px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all flex-shrink-0 snap-start flex items-center gap-2 cursor-pointer bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-600 hover:bg-orange-50">
+      <i class="fas fa-cookie-bite text-xs text-amber-500"></i>
+      <span>Dimsum & Cemilan</span>
     </button>
-    <button onclick="setCategoryFilter('minuman')" id="tab-minuman" class="category-tab px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-500 flex-shrink-0">
-      Minuman Segar
+    <button onclick="setCategoryFilter('minuman')" id="tab-minuman" class="category-tab px-4 sm:px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all flex-shrink-0 snap-start flex items-center gap-2 cursor-pointer bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-600 hover:bg-orange-50">
+      <i class="fas fa-glass-water text-xs text-blue-500"></i>
+      <span>Minuman Segar</span>
     </button>
   </div>
 
   <!-- Product Cards Grid -->
-  <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+  <div id="productGrid" class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3.5 sm:gap-6">
     <!-- Rendered dynamically by JavaScript -->
   </div>
 
@@ -1092,22 +1099,22 @@ function renderProducts() {
   empty.classList.add('hidden');
 
   grid.innerHTML = filtered.map(p => {
-    return '<div class="card-premium overflow-hidden flex flex-col group border border-slate-100 cursor-pointer" data-id="' + p.id + '" onclick="openFoodDetailDrawer(this.dataset.id)">' +
-      '<div class="relative h-52 bg-slate-100 overflow-hidden">' +
-        '<img src="' + p.image + '" alt="' + p.name + '" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-out"/>' +
-        '<span class="absolute top-3 left-3 ' + p.badgeColor + ' px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">' + p.badge + '</span>' +
-        '<span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">' +
+    return '<div class="card-premium overflow-hidden flex flex-col justify-between group border border-slate-100 cursor-pointer select-none" data-id="' + p.id + '" onclick="openFoodDetailDrawer(this.dataset.id)">' +
+      '<div class="relative aspect-[4/3] sm:h-48 lg:h-52 bg-slate-100 overflow-hidden sm:aspect-auto">' +
+        '<img src="' + p.image + '" alt="' + p.name + '" class="w-full h-full object-cover object-center transform group-hover:scale-105 transition-transform duration-500 ease-out"/>' +
+        '<span class="absolute top-2.5 left-2.5 sm:top-3 sm:left-3 ' + p.badgeColor + ' px-2.5 py-0.5 sm:px-3 sm:py-1 rounded-full text-[9px] sm:text-[10px] font-bold shadow-sm">' + p.badge + '</span>' +
+        '<span class="absolute top-2.5 right-2.5 sm:top-3 sm:right-3 bg-white/90 backdrop-blur-md text-slate-800 text-[9px] sm:text-[10px] font-bold px-2 py-0.5 sm:px-2.5 sm:py-1 rounded-full shadow-sm flex items-center gap-1">' +
           '<i class="fas fa-star text-amber-400"></i> ' + p.rating +
         '</span>' +
       '</div>' +
-      '<div class="p-5 flex-1 flex flex-col justify-between">' +
+      '<div class="p-3.5 sm:p-5 flex-1 flex flex-col justify-between">' +
         '<div>' +
-          '<h3 class="font-display text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors">' + p.name + '</h3>' +
-          '<p class="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">' + p.subtitle + '</p>' +
+          '<h3 class="font-display text-xs sm:text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors line-clamp-1 sm:line-clamp-none">' + p.name + '</h3>' +
+          '<p class="text-slate-500 text-[11px] sm:text-xs mt-1 line-clamp-2 leading-relaxed">' + p.subtitle + '</p>' +
         '</div>' +
-        '<div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-4">' +
-          '<span class="font-display text-base font-bold text-slate-900">Rp ' + p.priceFormatted + '</span>' +
-          '<span class="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1">Pesan <i class="fas fa-chevron-right text-[10px]"></i></span>' +
+        '<div class="pt-3 sm:pt-4 border-t border-slate-100 flex items-center justify-between mt-3 sm:mt-4">' +
+          '<span class="font-display text-xs sm:text-base font-bold text-slate-900">Rp ' + p.priceFormatted + '</span>' +
+          '<span class="text-[11px] sm:text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1">Pesan <i class="fas fa-chevron-right text-[9px] sm:text-[10px]"></i></span>' +
         '</div>' +
       '</div>' +
     '</div>';
@@ -1117,15 +1124,18 @@ function renderProducts() {
 // Category Tabs
 function setCategoryFilter(cat) {
   activeCategory = cat;
+  const activeClasses = ['bg-orange-500', 'text-white', 'shadow-md', 'shadow-orange-500/20', 'border-orange-500', 'hover:bg-orange-600', 'hover:text-white'];
+  const inactiveClasses = ['bg-white', 'border-slate-200', 'text-slate-700', 'hover:border-orange-500', 'hover:text-orange-600', 'hover:bg-orange-50'];
+
   document.querySelectorAll('.category-tab').forEach(btn => {
-    btn.classList.remove('bg-orange-500', 'text-white', 'shadow-sm');
-    btn.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+    activeClasses.forEach(c => btn.classList.remove(c));
+    inactiveClasses.forEach(c => btn.classList.add(c));
   });
 
   const activeBtn = document.getElementById('tab-' + cat);
   if (activeBtn) {
-    activeBtn.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
-    activeBtn.classList.add('bg-orange-500', 'text-white', 'shadow-sm');
+    inactiveClasses.forEach(c => activeBtn.classList.remove(c));
+    activeClasses.forEach(c => activeBtn.classList.add(c));
   }
   renderProducts();
 }
