@@ -1,6 +1,7 @@
 // ============================================================
 // Mie Level - Main Express Application Entry Point
-// Sprint 1: Authentication & Minimal User Dashboard
+// Redesigned: Modern, Premium Food Ordering Experience
+// Inspired by Apple, Stripe, Linear, & GrabFood Aesthetics
 // ============================================================
 
 const express = require("express");
@@ -22,6 +23,10 @@ const COOKIE_NAME = "mie_level_token";
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve static assets (images, stylesheets, icons)
+app.use("/public", express.static(path.join(__dirname, "../public")));
+app.use(express.static(path.join(__dirname, "../public")));
 
 // --------------- Auth Middleware ---------------
 function authenticateToken(req, res, next) {
@@ -103,7 +108,7 @@ app.post("/api/register", async (req, res) => {
     }
 
     // --- Check existing user ---
-    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase() } });
+    const existingUser = await prisma.user.findUnique({ where: { email: email.toLowerCase().trim() } });
     if (existingUser) {
       return res.status(409).json({ success: false, message: "Email sudah terdaftar." });
     }
@@ -130,7 +135,7 @@ app.post("/api/register", async (req, res) => {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+      maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
     return res.status(201).json({ success: true, message: "Registrasi berhasil!", redirect: "/dashboard" });
@@ -190,16 +195,16 @@ app.get("/api/logout", (req, res) => {
 });
 
 // ============================================================
-//  INLINE HTML VIEW FUNCTIONS
+//  INLINE HTML VIEW FUNCTIONS & STYLES
 // ============================================================
 
 function baseHead(title) {
   return `
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="description" content="Mie Level - Pesan mie pedas level favoritmu secara online. Cepat, mudah, dan lezat!" />
+    <meta name="description" content="Mie Level - Premium Spicy Noodle Ordering Experience" />
     <title>${title} | Mie Level</title>
-    <script src="https://cdn.tailwindcss.com"><\/script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script>
       tailwindcss.config = {
         theme: {
@@ -210,65 +215,80 @@ function baseHead(title) {
                 400: '#fb923c', 500: '#f97316', 600: '#ea580c', 700: '#c2410c',
                 800: '#9a3412', 900: '#7c2d12',
               },
+              cream: {
+                50: '#fffbf7', 100: '#faf8f5', 200: '#f5f0eb',
+              }
             },
             fontFamily: {
-              sans: ['Plus Jakarta Sans', 'Inter', 'system-ui', 'sans-serif'],
-              display: ['Plus Jakarta Sans', 'Inter', 'sans-serif'],
+              sans: ['Poppins', 'system-ui', 'sans-serif'],
+              display: ['Poppins', 'sans-serif'],
             },
+            borderRadius: {
+              '20': '20px',
+              '24': '24px',
+            }
           },
         },
       }
-    <\/script>
+    </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
     <style>
       * { margin: 0; padding: 0; box-sizing: border-box; }
-      body { font-family: 'Plus Jakarta Sans', 'Inter', system-ui, sans-serif; background: #fafaf8; color: #1a1a2e; }
+      body { font-family: 'Poppins', system-ui, sans-serif; background: #FFFBF7; color: #1e293b; -webkit-font-smoothing: antialiased; }
 
       .btn-primary {
-        background: linear-gradient(135deg, #f97316 0%, #ea580c 100%);
-        transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-        position: relative; overflow: hidden;
+        background: #f97316;
+        color: #ffffff;
+        transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       }
-      .btn-primary::after {
-        content: ''; position: absolute; top: 0; left: -100%;
-        width: 100%; height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.15), transparent);
-        transition: left 0.6s;
+      .btn-primary:hover {
+        background: #ea580c;
+        transform: scale(1.02);
+        box-shadow: 0 10px 20px -5px rgba(249, 115, 22, 0.35);
       }
-      .btn-primary:hover::after { left: 100%; }
-      .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 12px 24px -6px rgba(249,115,22,0.4); }
-      .btn-primary:active { transform: translateY(0); }
+      .btn-primary:active { transform: scale(0.98); }
 
       .btn-secondary {
-        background: white; border: 1.5px solid #e2e8f0; color: #334155;
-        transition: all 0.2s ease;
+        background: #ffffff;
+        border: 1.5px solid #e2e8f0;
+        color: #334155;
+        transition: all 0.25s ease;
       }
-      .btn-secondary:hover { border-color: #f97316; color: #ea580c; background: #fff7ed; }
+      .btn-secondary:hover {
+        border-color: #f97316;
+        color: #f97316;
+        background: #fff7ed;
+        transform: scale(1.02);
+      }
+      .btn-secondary:active { transform: scale(0.98); }
 
       .input-modern { transition: all 0.25s ease; background: #f8fafc; }
       .input-modern:focus {
         outline: none; border-color: #f97316;
-        box-shadow: 0 0 0 4px rgba(249,115,22,0.08), 0 1px 3px rgba(0,0,0,0.06);
-        background: #fff;
+        box-shadow: 0 0 0 4px rgba(249,115,22,0.1);
+        background: #ffffff;
       }
 
       .card-premium {
-        transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
-        box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        border-radius: 20px;
+        background: #ffffff;
+        box-shadow: 0 4px 20px -4px rgba(0, 0, 0, 0.04);
       }
       .card-premium:hover {
         transform: translateY(-6px);
-        box-shadow: 0 20px 40px -12px rgba(249,115,22,0.12), 0 8px 16px -8px rgba(0,0,0,0.06);
+        box-shadow: 0 20px 30px -10px rgba(0, 0, 0, 0.08);
       }
 
-      .spice-meter { display: flex; gap: 3px; }
-      .spice-dot { width: 8px; height: 8px; border-radius: 50%; background: #e2e8f0; transition: all 0.3s ease; }
-      .spice-dot.active { background: #f97316; }
-      .spice-dot.hot { background: #ef4444; }
-      .spice-dot.hell { background: #dc2626; box-shadow: 0 0 6px rgba(220,38,38,0.4); }
+      .detail-drawer {
+        transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      .detail-drawer.open {
+        transform: translateX(0);
+      }
 
       .toast {
         position: fixed; top: 1.25rem; right: 1.25rem;
@@ -281,30 +301,11 @@ function baseHead(title) {
         display: flex; align-items: center; gap: 0.625rem;
       }
       .toast.show { transform: translateX(0); }
-      .toast-success { background: #fff; color: #065f46; border: 1px solid #a7f3d0; }
-      .toast-success::before { content: '\\2713'; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: #d1fae5; color: #065f46; border-radius: 50%; font-size: 12px; font-weight: 800; flex-shrink: 0; }
-      .toast-error { background: #fff; color: #991b1b; border: 1px solid #fecaca; }
-      .toast-error::before { content: '!'; display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 24px; background: #fee2e2; color: #991b1b; border-radius: 50%; font-size: 12px; font-weight: 800; flex-shrink: 0; }
+      .toast-success { background: #ffffff; color: #065f46; border: 1px solid #a7f3d0; }
+      .toast-error { background: #ffffff; color: #991b1b; border: 1px solid #fecaca; }
 
       .spinner { width: 18px; height: 18px; border: 2.5px solid rgba(255,255,255,0.3); border-top-color: #fff; border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; vertical-align: middle; }
       @keyframes spin { to { transform: rotate(360deg); } }
-
-      @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
-      @keyframes fadeInLeft { from { opacity: 0; transform: translateX(-20px); } to { opacity: 1; transform: translateX(0); } }
-      @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-12px); } }
-      @keyframes pulse-soft { 0%, 100% { opacity: 1; } 50% { opacity: 0.6; } }
-
-      .fade-in-up { animation: fadeInUp 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
-      .fade-in-left { animation: fadeInLeft 0.6s cubic-bezier(0.16,1,0.3,1) forwards; }
-      .animate-float { animation: float 4s ease-in-out infinite; }
-      .animate-pulse-soft { animation: pulse-soft 3s ease-in-out infinite; }
-      .fade-in-up-delay-1 { animation-delay: 0.1s; opacity: 0; }
-      .fade-in-up-delay-2 { animation-delay: 0.2s; opacity: 0; }
-      .fade-in-up-delay-3 { animation-delay: 0.3s; opacity: 0; }
-      .fade-in-up-delay-4 { animation-delay: 0.4s; opacity: 0; }
-
-      .pattern-dots { background-image: radial-gradient(circle, rgba(249,115,22,0.12) 1px, transparent 1px); background-size: 24px 24px; }
-      .stat-icon { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
 
       ::-webkit-scrollbar { width: 6px; }
       ::-webkit-scrollbar-track { background: transparent; }
@@ -314,86 +315,51 @@ function baseHead(title) {
   `;
 }
 
-function noodleSVG() {
-  return `
-    <svg viewBox="0 0 400 400" fill="none" xmlns="http://www.w3.org/2000/svg" class="w-64 h-64 sm:w-80 sm:h-80 animate-float drop-shadow-xl">
-      <ellipse cx="200" cy="280" rx="140" ry="40" fill="#ea580c" opacity="0.15"/>
-      <path d="M80 220 C80 300, 320 300, 320 220" fill="#fff7ed" stroke="#f97316" stroke-width="3"/>
-      <path d="M60 220 C60 220, 200 240, 340 220" fill="none" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
-      <ellipse cx="200" cy="220" rx="140" ry="28" fill="#ffedd5" stroke="#f97316" stroke-width="2.5"/>
-      <path d="M130 210 Q150 170, 180 200 Q210 230, 200 190 Q190 150, 220 185 Q250 220, 240 180 Q230 140, 270 190" fill="none" stroke="#fdba74" stroke-width="5" stroke-linecap="round" opacity="0.9"/>
-      <path d="M140 215 Q160 180, 190 210 Q220 240, 210 195 Q200 150, 230 190 Q260 230, 250 185" fill="none" stroke="#fed7aa" stroke-width="4" stroke-linecap="round" opacity="0.7"/>
-      <ellipse cx="160" cy="205" rx="20" ry="15" fill="#fef3c7" stroke="#fbbf24" stroke-width="2"/>
-      <ellipse cx="160" cy="203" rx="8" ry="7" fill="#f59e0b"/>
-      <g transform="translate(240,190) rotate(-25)"><path d="M0 0 Q10 -15, 5 -30 Q0 -20, 0 0Z" fill="#ef4444"/><path d="M5 -30 Q6 -38, 4 -35" stroke="#16a34a" stroke-width="2" fill="none" stroke-linecap="round"/></g>
-      <g transform="translate(255,195) rotate(-10)"><path d="M0 0 Q8 -12, 4 -25 Q0 -16, 0 0Z" fill="#dc2626"/><path d="M4 -25 Q5 -32, 3 -29" stroke="#16a34a" stroke-width="1.5" fill="none" stroke-linecap="round"/></g>
-      <path d="M160 170 Q155 150, 165 135" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.3" class="animate-pulse-soft"/>
-      <path d="M200 165 Q195 140, 205 125" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.25"/>
-      <path d="M240 170 Q235 148, 245 132" stroke="#94a3b8" stroke-width="2" fill="none" stroke-linecap="round" opacity="0.3"/>
-      <line x1="260" y1="130" x2="180" y2="230" stroke="#9a3412" stroke-width="4" stroke-linecap="round"/>
-      <line x1="275" y1="135" x2="195" y2="230" stroke="#7c2d12" stroke-width="4" stroke-linecap="round"/>
-    </svg>
-  `;
-}
-
 // -------------------- LOGIN PAGE --------------------
 function loginPage() {
   return `<!DOCTYPE html>
 <html lang="id">
 <head>${baseHead("Login")}</head>
-<body class="min-h-screen antialiased">
+<body class="min-h-screen antialiased bg-[#FFFBF7]">
 <div class="min-h-screen flex">
-  <!-- Left Panel -->
-  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-orange-50 via-amber-50/80 to-white relative items-center justify-center overflow-hidden">
-    <div class="pattern-dots absolute inset-0 opacity-40"></div>
-    <div class="absolute top-20 left-16 w-32 h-32 bg-orange-200/30 rounded-full blur-2xl"></div>
-    <div class="absolute bottom-32 right-20 w-48 h-48 bg-amber-200/25 rounded-full blur-3xl"></div>
-    <div class="relative z-10 text-center px-12 fade-in-left">
-      ${noodleSVG()}
-      <div class="mt-8">
-        <h2 class="font-display text-2xl font-extrabold text-slate-800">Mie Pedas Favorit Indonesia</h2>
-        <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto leading-relaxed">Rasakan sensasi pedas dengan 10 tingkat level yang menantang selera dan keberanianmu!</p>
+  <!-- Left Panel: Minimalist Food Showcase -->
+  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-orange-500 to-amber-600 relative items-center justify-center p-12 overflow-hidden">
+    <div class="relative z-10 max-w-md text-white text-center">
+      <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-[20px] mx-auto flex items-center justify-center mb-6 border border-white/20">
+        <i class="fas fa-utensils text-3xl text-white"></i>
       </div>
-      <div class="mt-8 bg-white/80 backdrop-blur-sm rounded-2xl p-5 border border-orange-100 shadow-sm max-w-xs mx-auto">
-        <div class="flex items-center gap-3 mb-2">
-          <div class="w-9 h-9 bg-gradient-to-br from-orange-400 to-amber-500 rounded-full flex items-center justify-center text-white text-xs font-bold">A</div>
-          <div class="text-left"><p class="text-sm font-bold text-slate-800">Andi Pratama</p><p class="text-[11px] text-slate-400">Pelanggan Setia</p></div>
-        </div>
-        <p class="text-xs text-slate-600 leading-relaxed italic">"Mie Level 5 bener-bener bikin nagih! Pedasnya pas, bumbunya gurih. Recommended banget 🔥"</p>
-        <div class="flex gap-0.5 mt-2"><i class="fas fa-star text-amber-400 text-xs"></i><i class="fas fa-star text-amber-400 text-xs"></i><i class="fas fa-star text-amber-400 text-xs"></i><i class="fas fa-star text-amber-400 text-xs"></i><i class="fas fa-star text-amber-400 text-xs"></i></div>
-      </div>
+      <h2 class="font-display text-3xl font-bold leading-tight">Mie Level Culinary</h2>
+      <p class="text-orange-100 text-sm mt-3 leading-relaxed">Pesan mie pedas favoritmu secara online dengan pengalaman yang cepat, mudah, dan premium.</p>
     </div>
   </div>
 
-  <!-- Right Panel: Form -->
+  <!-- Right Panel: Login Form -->
   <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
-    <div class="w-full max-w-md fade-in-up">
+    <div class="w-full max-w-md">
       <div class="mb-10">
         <div class="flex items-center gap-3 mb-8">
-          <div class="w-11 h-11 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20"><span class="text-xl">🍜</span></div>
-          <span class="font-display text-xl font-extrabold text-slate-900 tracking-tight">Mie Level</span>
+          <div class="w-10 h-10 bg-orange-500 rounded-[14px] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/20">
+            M
+          </div>
+          <span class="font-display text-xl font-bold text-slate-900 tracking-tight">Mie Level</span>
         </div>
-        <h1 class="font-display text-3xl font-extrabold text-slate-900 tracking-tight">Selamat Datang! 👋</h1>
-        <p class="text-slate-500 text-sm mt-2">Masuk ke akun untuk melanjutkan pesanan mie favoritmu.</p>
+        <h1 class="font-display text-2xl font-bold text-slate-900">Selamat Datang</h1>
+        <p class="text-slate-500 text-sm mt-1">Masuk ke akun untuk melanjutkan pesanan.</p>
       </div>
 
       <form id="loginForm" class="space-y-5">
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2" for="email">Email</label>
-          <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i class="far fa-envelope text-sm"></i></span>
-            <input type="email" id="email" name="email" required autocomplete="email" placeholder="nama@email.com" class="input-modern w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm" />
-          </div>
+          <label class="block text-xs font-semibold text-slate-700 mb-2" for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email" placeholder="nama@email.com" class="input-modern w-full px-4 py-3 border border-slate-200 rounded-[14px] text-slate-900 placeholder-slate-400 text-sm" />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2" for="password">Password</label>
+          <label class="block text-xs font-semibold text-slate-700 mb-2" for="password">Password</label>
           <div class="relative">
-            <span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-lock text-sm"></i></span>
-            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••" class="input-modern w-full pl-11 pr-12 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm" />
+            <input type="password" id="password" name="password" required autocomplete="current-password" placeholder="••••••••" class="input-modern w-full px-4 py-3 border border-slate-200 rounded-[14px] text-slate-900 placeholder-slate-400 text-sm" />
             <button type="button" onclick="togglePassword('password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Toggle password visibility"><i class="far fa-eye eye-icon text-sm"></i></button>
           </div>
         </div>
-        <button type="submit" id="loginBtn" class="btn-primary w-full py-3.5 text-white font-bold rounded-xl text-sm shadow-lg mt-1 flex items-center justify-center gap-2"><span>Masuk ke Akun</span><i class="fas fa-arrow-right text-xs"></i></button>
+        <button type="submit" id="loginBtn" class="btn-primary w-full py-3.5 font-semibold rounded-[14px] text-sm shadow-md mt-1 flex items-center justify-center gap-2"><span>Masuk</span><i class="fas fa-arrow-right text-xs"></i></button>
       </form>
 
       <div class="mt-8 text-center">
@@ -431,7 +397,7 @@ document.getElementById('loginForm').addEventListener('submit', async (e) => {
     else { showToast(data.message, 'error'); btn.innerHTML = orig; btn.disabled = false; btn.style.opacity = '1'; }
   } catch { showToast('Gagal terhubung ke server.', 'error'); btn.innerHTML = orig; btn.disabled = false; btn.style.opacity = '1'; }
 });
-<\/script>
+</script>
 </body></html>`;
 }
 
@@ -440,57 +406,51 @@ function registerPage() {
   return `<!DOCTYPE html>
 <html lang="id">
 <head>${baseHead("Daftar")}</head>
-<body class="min-h-screen antialiased">
+<body class="min-h-screen antialiased bg-[#FFFBF7]">
 <div class="min-h-screen flex">
-  <!-- Left Panel -->
-  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-amber-50 via-orange-50/60 to-white relative items-center justify-center overflow-hidden">
-    <div class="pattern-dots absolute inset-0 opacity-40"></div>
-    <div class="absolute top-32 right-20 w-40 h-40 bg-orange-200/25 rounded-full blur-3xl"></div>
-    <div class="absolute bottom-20 left-16 w-36 h-36 bg-amber-200/30 rounded-full blur-2xl"></div>
-    <div class="relative z-10 text-center px-12 fade-in-left">
-      ${noodleSVG()}
-      <div class="mt-8">
-        <h2 class="font-display text-2xl font-extrabold text-slate-800">Gabung Keluarga Mie Level!</h2>
-        <p class="text-slate-500 text-sm mt-2 max-w-xs mx-auto leading-relaxed">Daftar sekarang dan dapatkan akses ke menu mie pedas eksklusif dengan berbagai tingkat level.</p>
+  <!-- Left Panel Showcase -->
+  <div class="hidden lg:flex lg:w-1/2 bg-gradient-to-br from-amber-600 to-orange-600 relative items-center justify-center p-12 overflow-hidden">
+    <div class="relative z-10 max-w-md text-white text-center">
+      <div class="w-20 h-20 bg-white/10 backdrop-blur-md rounded-[20px] mx-auto flex items-center justify-center mb-6 border border-white/20">
+        <i class="fas fa-fire text-3xl text-white"></i>
       </div>
-      <div class="flex items-center justify-center gap-4 mt-8">
-        <div class="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-orange-100 shadow-sm text-center"><p class="text-xl font-extrabold text-orange-600">1.2K+</p><p class="text-[11px] text-slate-500 font-medium">Pelanggan</p></div>
-        <div class="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-orange-100 shadow-sm text-center"><p class="text-xl font-extrabold text-amber-600">4.9</p><p class="text-[11px] text-slate-500 font-medium">Rating ⭐</p></div>
-        <div class="bg-white/80 backdrop-blur-sm rounded-xl px-4 py-3 border border-orange-100 shadow-sm text-center"><p class="text-xl font-extrabold text-rose-600">10</p><p class="text-[11px] text-slate-500 font-medium">Level Pedas</p></div>
-      </div>
+      <h2 class="font-display text-3xl font-bold leading-tight">Bergabung dengan Mie Level</h2>
+      <p class="text-orange-100 text-sm mt-3 leading-relaxed">Nikmati kemudahan pesan antar hidangan mie pedas favoritmu secara praktis.</p>
     </div>
   </div>
 
-  <!-- Right Panel: Form -->
+  <!-- Right Panel: Register Form -->
   <div class="w-full lg:w-1/2 flex items-center justify-center p-6 sm:p-12 bg-white">
-    <div class="w-full max-w-md fade-in-up">
+    <div class="w-full max-w-md">
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-8">
-          <div class="w-11 h-11 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20"><span class="text-xl">🍜</span></div>
-          <span class="font-display text-xl font-extrabold text-slate-900 tracking-tight">Mie Level</span>
+          <div class="w-10 h-10 bg-orange-500 rounded-[14px] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/20">
+            M
+          </div>
+          <span class="font-display text-xl font-bold text-slate-900 tracking-tight">Mie Level</span>
         </div>
-        <h1 class="font-display text-3xl font-extrabold text-slate-900 tracking-tight">Buat Akun Baru 🎉</h1>
-        <p class="text-slate-500 text-sm mt-2">Lengkapi data di bawah untuk mulai memesan.</p>
+        <h1 class="font-display text-2xl font-bold text-slate-900">Buat Akun Baru</h1>
+        <p class="text-slate-500 text-sm mt-1">Lengkapi data untuk memulai pemesanan.</p>
       </div>
 
       <form id="registerForm" class="space-y-4">
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2" for="nama">Nama Lengkap</label>
-          <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i class="far fa-user text-sm"></i></span><input type="text" id="nama" name="nama" required autocomplete="name" placeholder="Masukkan nama lengkap" class="input-modern w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm" /></div>
+          <label class="block text-xs font-semibold text-slate-700 mb-2" for="nama">Nama Lengkap</label>
+          <input type="text" id="nama" name="nama" required autocomplete="name" placeholder="Masukkan nama lengkap" class="input-modern w-full px-4 py-3 border border-slate-200 rounded-[14px] text-slate-900 placeholder-slate-400 text-sm" />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2" for="email">Email</label>
-          <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i class="far fa-envelope text-sm"></i></span><input type="email" id="email" name="email" required autocomplete="email" placeholder="nama@email.com" class="input-modern w-full pl-11 pr-4 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm" /></div>
+          <label class="block text-xs font-semibold text-slate-700 mb-2" for="email">Email</label>
+          <input type="email" id="email" name="email" required autocomplete="email" placeholder="nama@email.com" class="input-modern w-full px-4 py-3 border border-slate-200 rounded-[14px] text-slate-900 placeholder-slate-400 text-sm" />
         </div>
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2" for="password">Password</label>
-          <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-lock text-sm"></i></span><input type="password" id="password" name="password" required autocomplete="new-password" placeholder="Minimal 6 karakter" class="input-modern w-full pl-11 pr-12 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm" /><button type="button" onclick="togglePassword('password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Toggle"><i class="far fa-eye eye-icon text-sm"></i></button></div>
+          <label class="block text-xs font-semibold text-slate-700 mb-2" for="password">Password</label>
+          <div class="relative"><input type="password" id="password" name="password" required autocomplete="new-password" placeholder="Minimal 6 karakter" class="input-modern w-full px-4 py-3 border border-slate-200 rounded-[14px] text-slate-900 placeholder-slate-400 text-sm" /><button type="button" onclick="togglePassword('password', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Toggle"><i class="far fa-eye eye-icon text-sm"></i></button></div>
         </div>
         <div>
-          <label class="block text-sm font-semibold text-slate-700 mb-2" for="confirmPassword">Konfirmasi Password</label>
-          <div class="relative"><span class="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-lock text-sm"></i></span><input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password" placeholder="Ulangi password" class="input-modern w-full pl-11 pr-12 py-3.5 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm" /><button type="button" onclick="togglePassword('confirmPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Toggle"><i class="far fa-eye eye-icon text-sm"></i></button></div>
+          <label class="block text-xs font-semibold text-slate-700 mb-2" for="confirmPassword">Konfirmasi Password</label>
+          <div class="relative"><input type="password" id="confirmPassword" name="confirmPassword" required autocomplete="new-password" placeholder="Ulangi password" class="input-modern w-full px-4 py-3 border border-slate-200 rounded-[14px] text-slate-900 placeholder-slate-400 text-sm" /><button type="button" onclick="togglePassword('confirmPassword', this)" class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors" aria-label="Toggle"><i class="far fa-eye eye-icon text-sm"></i></button></div>
         </div>
-        <button type="submit" id="registerBtn" class="btn-primary w-full py-3.5 text-white font-bold rounded-xl text-sm shadow-lg mt-1 flex items-center justify-center gap-2"><span>Daftar Sekarang</span><i class="fas fa-arrow-right text-xs"></i></button>
+        <button type="submit" id="registerBtn" class="btn-primary w-full py-3.5 font-semibold rounded-[14px] text-sm shadow-md mt-1 flex items-center justify-center gap-2"><span>Daftar</span><i class="fas fa-arrow-right text-xs"></i></button>
       </form>
 
       <div class="mt-8 text-center"><p class="text-slate-500 text-sm">Sudah memiliki akun? <a href="/login" class="text-orange-600 font-semibold hover:text-orange-700 transition-colors ml-1">Masuk di sini</a></p></div>
@@ -526,138 +486,908 @@ document.getElementById('registerForm').addEventListener('submit', async (e) => 
     else { showToast(data.message, 'error'); btn.innerHTML = orig; btn.disabled = false; btn.style.opacity = '1'; }
   } catch { showToast('Gagal terhubung ke server.', 'error'); btn.innerHTML = orig; btn.disabled = false; btn.style.opacity = '1'; }
 });
-<\/script>
+</script>
 </body></html>`;
 }
 
 // -------------------- DASHBOARD PAGE --------------------
 function dashboardPage(user) {
   const products = [
-    { name:"Mie Level 1", subtitle:"Pedas Manis", desc:"Perpaduan rasa manis dan pedas yang pas untuk pemula. Gurih dengan aroma rempah pilihan.", price:"15.000", spiceLevel:1, badgeLabel:"Pemula", badgeColor:"bg-amber-100 text-amber-800", cardAccent:"from-amber-400 to-orange-400", emoji:"🍜", image:"" },
-    { name:"Mie Level 3", subtitle:"Pedas Nampol", desc:"Tingkat pedas sedang yang bikin ketagihan! Bumbu cabai asli dengan tekstur mie kenyal.", price:"18.000", spiceLevel:3, badgeLabel:"Sedang", badgeColor:"bg-orange-100 text-orange-800", cardAccent:"from-orange-400 to-orange-500", emoji:"🍝", image:"" },
-    { name:"Mie Level 5", subtitle:"Pedas Gila", desc:"Sensasi pedas membakar untuk pecinta tantangan! Lezat dan meledak di mulut.", price:"22.000", spiceLevel:5, badgeLabel:"Pedas", badgeColor:"bg-rose-100 text-rose-800", cardAccent:"from-rose-400 to-red-500", emoji:"🔥", image:"" },
-    { name:"Mie Level 10", subtitle:"Level Neraka", desc:"Tingkat kepedasan TERTINGGI! Racikan cabai rawit super murni. Khusus penikmat sejati!", price:"28.000", spiceLevel:10, badgeLabel:"Extreme", badgeColor:"bg-red-100 text-red-900", cardAccent:"from-red-500 to-red-700", emoji:"💀", image:"" },
+    {
+      id: "mie-gacoan",
+      name: "Mie Gacoan",
+      category: "mie",
+      subtitle: "Pedas Asin Gurih",
+      desc: "Mie pedas gurih pilihan bertabur daging ayam cincang gurih dan pangsit renyah.",
+      price: 14000,
+      priceFormatted: "14.000",
+      badge: "Favorite",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/mie_gacoan.png",
+      rating: "4.9",
+      prepTime: "10 - 15 Menit",
+      portion: "1 Porsi (250g)"
+    },
+    {
+      id: "mie-hompimpa",
+      name: "Mie Hompimpa",
+      category: "mie",
+      subtitle: "Pedas Manis Gurih",
+      desc: "Perpaduan cita rasa manis gurih dan pedas mantap yang meresap hingga ke helai mie.",
+      price: 14000,
+      priceFormatted: "14.000",
+      badge: "Best Seller",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/mie_hompimpa.png",
+      rating: "4.9",
+      prepTime: "10 - 15 Menit",
+      portion: "1 Porsi (250g)"
+    },
+    {
+      id: "mie-suit",
+      name: "Mie Suit",
+      category: "mie",
+      subtitle: "Gurih Original (Non-Pedas)",
+      desc: "Mie gurih original tanpa rasa pedas, cocok untuk penikmat cita rasa asli gurih manis.",
+      price: 12000,
+      priceFormatted: "12.000",
+      badge: "Original",
+      badgeColor: "bg-emerald-600 text-white",
+      image: "/image/mie_suit.png",
+      rating: "4.8",
+      prepTime: "10 - 15 Menit",
+      portion: "1 Porsi (250g)"
+    },
+    {
+      id: "udang-keju",
+      name: "Udang Keju",
+      category: "dimsum",
+      subtitle: "Keju Lumer Crispy",
+      desc: "Dimsum olahan udang lembut dengan isian keju leleh manis gurih yang lumer di mulut.",
+      price: 13000,
+      priceFormatted: "13.000",
+      badge: "Must Try",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/udang_keju.png",
+      rating: "5.0",
+      prepTime: "8 - 12 Menit",
+      portion: "3 Pcs"
+    },
+    {
+      id: "udang-rambutan",
+      name: "Udang Rambutan",
+      category: "dimsum",
+      subtitle: "Super Crispy",
+      desc: "Bola-bola udang lembut dibalut krispi mi renyah bertekstur unik dan gurih.",
+      price: 13000,
+      priceFormatted: "13.000",
+      badge: "Favorite",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/udang_rambutan.png",
+      rating: "4.9",
+      prepTime: "8 - 12 Menit",
+      portion: "3 Pcs"
+    },
+    {
+      id: "lumpia-udang",
+      name: "Lumpia Udang",
+      category: "dimsum",
+      subtitle: "Kulit Tahu Gurih",
+      desc: "Lumpia isi olahan udang segar dipadu bumbu spesial berbalut kulit tahu renyah.",
+      price: 13000,
+      priceFormatted: "13.000",
+      badge: "Must Try",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/lumpia.png",
+      rating: "4.8",
+      prepTime: "8 - 12 Menit",
+      portion: "3 Pcs"
+    },
+    {
+      id: "pangsit-goreng",
+      name: "Pangsit Goreng",
+      category: "dimsum",
+      subtitle: "Renyah Maksimal",
+      desc: "Pangsit renyah isi daging pilihan yang lezat, teman sempurna pendamping mie pedas.",
+      price: 11000,
+      priceFormatted: "11.000",
+      badge: "Favorite",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/pangsit.png",
+      rating: "4.8",
+      prepTime: "5 - 10 Menit",
+      portion: "5 Pcs"
+    },
+    {
+      id: "es-gobak-sodor",
+      name: "Es Gobak Sodor",
+      category: "minuman",
+      subtitle: "Es Buah Spesial",
+      desc: "Perpaduan buah segar, jelly lembut, dan sirup spesial yang sangat dingin melegakan.",
+      price: 10000,
+      priceFormatted: "10.000",
+      badge: "Best Seller",
+      badgeColor: "bg-orange-500 text-white",
+      image: "/image/es_gobaksodor.png",
+      rating: "4.9",
+      prepTime: "3 - 5 Menit",
+      portion: "1 Gelas (400ml)"
+    },
+    {
+      id: "es-jeruk",
+      name: "Es Jeruk (Orange)",
+      category: "minuman",
+      subtitle: "Perasan Jeruk Asli",
+      desc: "Minuman perasan jeruk murni dingin kaya akan Vitamin C untuk penawar rasa pedas.",
+      price: 7000,
+      priceFormatted: "7.000",
+      badge: "Original",
+      badgeColor: "bg-emerald-600 text-white",
+      image: "/image/orange.png",
+      rating: "4.8",
+      prepTime: "3 - 5 Menit",
+      portion: "1 Gelas (400ml)"
+    },
+    {
+      id: "es-teh",
+      name: "Es Teh Manis",
+      category: "minuman",
+      subtitle: "Teh Tubruk Segar",
+      desc: "Es teh manis dengan racikan teh pilihan yang wangi dan menyegarkan.",
+      price: 5000,
+      priceFormatted: "5.000",
+      badge: "Original",
+      badgeColor: "bg-emerald-600 text-white",
+      image: "/image/esteh.png",
+      rating: "4.7",
+      prepTime: "2 - 4 Menit",
+      portion: "1 Gelas (400ml)"
+    },
+    {
+      id: "air-mineral",
+      name: "Air Mineral",
+      category: "minuman",
+      subtitle: "Pegunungan Murni",
+      desc: "Air mineral dingin murni penyegar dahaga utama penyeimbang rasa pedas.",
+      price: 4000,
+      priceFormatted: "4.000",
+      badge: "Original",
+      badgeColor: "bg-emerald-600 text-white",
+      image: "/image/air.png",
+      rating: "4.9",
+      prepTime: "1 - 2 Menit",
+      portion: "1 Botol (600ml)"
+    }
   ];
 
-  function renderSpiceDots(level) {
-    let dots = '';
-    for (let i = 1; i <= 10; i++) {
-      let cls = 'spice-dot';
-      if (i <= level) { if (level >= 8) cls += ' hell'; else if (level >= 4) cls += ' hot'; else cls += ' active'; }
-      dots += '<div class="' + cls + '"></div>';
-    }
-    return dots;
-  }
+  const toppingsList = [
+    { id: "telur", name: "Telur", price: 3000, priceFormatted: "+3.000" },
+    { id: "keju", name: "Keju", price: 4000, priceFormatted: "+4.000" },
+    { id: "pangsit", name: "Pangsit Goreng", price: 3000, priceFormatted: "+3.000" },
+    { id: "ceker", name: "Ceker", price: 5000, priceFormatted: "+5.000" },
+    { id: "bakso", name: "Bakso", price: 4000, priceFormatted: "+4.000" },
+  ];
 
-  const productCards = products.map((p, i) => `
-    <div class="card-premium bg-white rounded-2xl border border-slate-100 overflow-hidden flex flex-col fade-in-up fade-in-up-delay-${i + 1}">
-      <div class="relative h-48 bg-gradient-to-br ${p.cardAccent} flex items-center justify-center overflow-hidden">
-        <div class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -translate-y-8 translate-x-8"></div>
-        <div class="absolute bottom-0 left-0 w-16 h-16 bg-white/10 rounded-full translate-y-6 -translate-x-6"></div>
-        ${p.image ? '<img src="'+p.image+'" alt="'+p.name+'" class="w-full h-full object-cover"/>' : '<span class="text-7xl filter drop-shadow-lg relative z-10">'+p.emoji+'</span>'}
-        <div class="absolute top-3 left-3 ${p.badgeColor} px-3 py-1 rounded-full text-[11px] font-bold shadow-sm">${p.badgeLabel}</div>
-      </div>
-      <div class="p-5 flex-1 flex flex-col">
-        <div class="flex-1">
-          <h3 class="font-display text-base font-extrabold text-slate-900">${p.name}</h3>
-          <p class="text-orange-600 text-xs font-semibold mb-2">${p.subtitle}</p>
-          <p class="text-slate-500 text-xs leading-relaxed mb-3">${p.desc}</p>
-          <div class="flex items-center gap-2 mb-4"><span class="text-[10px] text-slate-400 font-semibold uppercase tracking-wide">Pedas</span><div class="spice-meter">${renderSpiceDots(p.spiceLevel)}</div></div>
-        </div>
-        <div class="pt-3 border-t border-slate-100 flex items-center justify-between">
-          <div><span class="text-[10px] text-slate-400 font-semibold">IDR</span><span class="font-display text-lg font-extrabold text-slate-900 ml-0.5">${p.price}</span></div>
-          <button class="btn-primary text-white px-5 py-2.5 rounded-xl text-xs font-bold flex items-center gap-1.5"><i class="fas fa-plus text-[10px]"></i> Pesan</button>
-        </div>
-      </div>
-    </div>
-  `).join("");
+  const productsJson = JSON.stringify(products);
+  const toppingsJson = JSON.stringify(toppingsList);
 
   return `<!DOCTYPE html>
 <html lang="id">
-<head>${baseHead("Dashboard")}</head>
-<body class="min-h-screen text-slate-900 antialiased" style="background:#fafaf8">
+<head>${baseHead("Dashboard Menu")}</head>
+<body class="min-h-screen text-slate-900 antialiased bg-[#FFFBF7]">
 
-<!-- Navigation -->
-<nav class="sticky top-0 z-50 bg-white/85 backdrop-blur-lg border-b border-slate-200/70">
+<!-- Navigation Bar -->
+<nav class="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-100 shadow-sm">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-    <div class="flex items-center justify-between h-16">
+    <div class="flex items-center justify-between h-16 sm:h-20">
+      
+      <!-- Brand Logo -->
       <div class="flex items-center gap-3">
-        <div class="w-10 h-10 bg-gradient-to-br from-orange-500 to-amber-500 rounded-xl flex items-center justify-center shadow-lg shadow-orange-500/20"><span class="text-lg">🍜</span></div>
-        <div><span class="font-display text-lg font-extrabold text-slate-900 tracking-tight block leading-tight">Mie Level</span><span class="text-[10px] text-slate-400 font-medium block leading-tight">Specialty Spicy Noodle</span></div>
-      </div>
-      <div class="flex items-center gap-3">
-        <div class="hidden sm:flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-xl px-3 py-1.5">
-          <div class="w-8 h-8 bg-gradient-to-br from-orange-400 to-amber-500 rounded-lg flex items-center justify-center text-xs font-bold text-white shadow-sm">${user.nama.charAt(0).toUpperCase()}</div>
-          <div><p class="text-slate-900 text-xs font-bold leading-tight">${user.nama}</p><p class="text-slate-400 text-[10px] font-medium">${user.role === 'ADMIN' ? '🛡️ Admin' : '👤 Member'}</p></div>
+        <div class="w-10 h-10 bg-orange-500 rounded-[14px] flex items-center justify-center text-white font-bold text-lg shadow-md shadow-orange-500/20">
+          M
         </div>
-        <a href="/api/logout" id="logoutBtn" class="btn-secondary flex items-center gap-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold"><i class="fas fa-sign-out-alt text-xs"></i><span class="hidden sm:inline">Keluar</span></a>
+        <div>
+          <span class="font-display text-lg font-bold text-slate-900 tracking-tight block leading-none">Mie Level</span>
+          <span class="text-[10px] text-orange-600 font-medium block mt-0.5">Spicy Culinary Order</span>
+        </div>
+      </div>
+
+      <!-- Quick Search Bar (Desktop) -->
+      <div class="hidden md:flex items-center flex-1 max-w-md mx-8">
+        <div class="relative w-full">
+          <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-search text-xs"></i></span>
+          <input type="text" id="searchInputNav" onkeyup="filterMenuSearch(this.value)" placeholder="Cari Mie Gacoan, Udang Keju, Es Teh..." class="w-full pl-9 pr-4 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-[14px] focus:bg-white focus:border-orange-500 focus:outline-none transition-all" />
+        </div>
+      </div>
+
+      <!-- Right Controls -->
+      <div class="flex items-center gap-3">
+        
+        <!-- Cart Trigger Button -->
+        <button onclick="toggleCartDrawer()" class="btn-primary relative px-4 py-2.5 rounded-[14px] font-medium text-xs flex items-center gap-2 shadow-sm">
+          <i class="fas fa-shopping-bag text-sm"></i>
+          <span class="hidden sm:inline">Keranjang</span>
+          <span id="cartCountBadge" class="bg-white text-orange-600 px-2 py-0.5 rounded-full text-[10px] font-bold">0</span>
+        </button>
+
+        <!-- User Profile -->
+        <div class="hidden sm:flex items-center gap-2.5 bg-slate-50 border border-slate-200/80 rounded-[14px] px-3 py-1.5">
+          <div class="w-8 h-8 bg-orange-500 rounded-[10px] flex items-center justify-center text-xs font-bold text-white shadow-sm">
+            ${user.nama.charAt(0).toUpperCase()}
+          </div>
+          <div>
+            <p class="text-slate-900 text-xs font-semibold leading-tight">${user.nama}</p>
+            <p class="text-slate-400 text-[10px]">${user.role === 'ADMIN' ? 'Admin' : 'Member'}</p>
+          </div>
+        </div>
+
+        <!-- Logout -->
+        <a href="/api/logout" id="logoutBtn" title="Keluar" class="btn-secondary px-3 py-2 rounded-[14px] text-xs font-medium flex items-center gap-1.5">
+          <i class="fas fa-sign-out-alt text-slate-500 text-xs"></i>
+          <span class="hidden sm:inline">Keluar</span>
+        </a>
       </div>
     </div>
   </div>
 </nav>
 
-<!-- Hero -->
-<section class="relative overflow-hidden">
-  <div class="absolute inset-0 bg-gradient-to-br from-orange-50/80 via-amber-50/40 to-transparent"></div>
-  <div class="absolute top-10 right-10 w-72 h-72 bg-orange-200/20 rounded-full blur-3xl"></div>
-  <div class="absolute bottom-0 left-0 w-96 h-48 bg-amber-100/15 rounded-full blur-3xl"></div>
-  <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-6">
-      <div class="fade-in-up">
-        <div class="inline-flex items-center gap-2 px-3 py-1.5 bg-orange-100/80 border border-orange-200 rounded-full text-orange-800 text-xs font-bold mb-4"><span class="w-1.5 h-1.5 bg-orange-500 rounded-full animate-pulse"></span> Selamat Datang</div>
-        <h1 class="font-display text-3xl sm:text-4xl font-extrabold text-slate-900 tracking-tight leading-tight">Halo, <span class="bg-gradient-to-r from-orange-600 to-amber-600 bg-clip-text text-transparent">${user.nama}</span>! 🔥</h1>
-        <p class="text-slate-600 mt-2 text-sm sm:text-base max-w-lg leading-relaxed">Pilih tingkat kepedasan favoritmu dan nikmati sensasi mie yang menggugah selera hari ini.</p>
+<!-- Redesigned Hero Section -->
+<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12">
+  <div class="bg-white rounded-[24px] border border-slate-100 p-6 sm:p-10 shadow-sm overflow-hidden">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+      
+      <!-- Left Column: Content & CTAs -->
+      <div class="lg:col-span-7 space-y-6">
+        <div class="inline-flex items-center px-3.5 py-1 bg-orange-50 border border-orange-100 rounded-full text-orange-600 text-xs font-semibold">
+          Kuliner Mie Pedas
+        </div>
+
+        <div class="space-y-1">
+          <p class="text-slate-500 text-base sm:text-lg font-medium">Selamat Datang Kembali,</p>
+          <h1 class="font-display text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight">
+            ${user.nama}
+          </h1>
+        </div>
+
+        <p class="text-slate-500 text-sm leading-relaxed max-w-xl">
+          Nikmati mie pedas dengan cita rasa terbaik. Pilih menu favoritmu dan atur level pedas sesuai selera.
+        </p>
+
+        <!-- Two CTA Buttons -->
+        <div class="flex flex-wrap items-center gap-3 pt-2">
+          <button onclick="scrollToMenu()" class="btn-primary px-6 py-3.5 rounded-[16px] text-xs font-semibold shadow-md flex items-center gap-2">
+            <span>Pesan Sekarang</span>
+            <i class="fas fa-arrow-right text-xs"></i>
+          </button>
+          <button onclick="scrollToMenu()" class="btn-secondary px-6 py-3.5 rounded-[16px] text-xs font-semibold flex items-center gap-2">
+            <span>Lihat Menu</span>
+          </button>
+        </div>
+
+        <!-- Only Two Simple Feature Cards -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-4 border-t border-slate-100">
+          <div class="flex items-center gap-3.5 bg-[#FFFBF7] p-3.5 rounded-[16px] border border-slate-100">
+            <div class="w-10 h-10 rounded-[12px] bg-orange-100 text-orange-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+              <i class="fas fa-pepper-hot"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-900">Level Pedas 0–8</p>
+              <p class="text-[11px] text-slate-500">Sesuaikan Kepedasan Sesuai Selera</p>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-3.5 bg-[#FFFBF7] p-3.5 rounded-[16px] border border-slate-100">
+            <div class="w-10 h-10 rounded-[12px] bg-emerald-100 text-emerald-600 flex items-center justify-center text-sm font-bold flex-shrink-0">
+              <i class="fas fa-fire-burner"></i>
+            </div>
+            <div>
+              <p class="text-xs font-bold text-slate-900">Fresh Cooked</p>
+              <p class="text-[11px] text-slate-500">Dimasak Segar Setiap Pesanan</p>
+            </div>
+          </div>
+        </div>
+
       </div>
-      <div class="fade-in-up fade-in-up-delay-1 flex-shrink-0"><a href="#menu" class="btn-primary inline-flex items-center gap-2 px-6 py-3 text-white font-bold rounded-xl text-sm shadow-lg"><i class="fas fa-utensils"></i> Lihat Menu</a></div>
-    </div>
 
-    <!-- Stats -->
-    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 mt-10 fade-in-up fade-in-up-delay-2">
-      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3"><div class="stat-icon bg-orange-50 text-orange-600"><i class="fas fa-bowl-food"></i></div><div><p class="text-xl font-extrabold text-slate-900 font-display leading-tight">4</p><p class="text-slate-500 text-[11px] font-medium">Menu Spesial</p></div></div>
-      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3"><div class="stat-icon bg-rose-50 text-rose-600"><i class="fas fa-pepper-hot"></i></div><div><p class="text-xl font-extrabold text-slate-900 font-display leading-tight">10</p><p class="text-slate-500 text-[11px] font-medium">Tingkat Pedas</p></div></div>
-      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3"><div class="stat-icon bg-blue-50 text-blue-600"><i class="fas fa-receipt"></i></div><div><p class="text-xl font-extrabold text-slate-900 font-display leading-tight">0</p><p class="text-slate-500 text-[11px] font-medium">Pesanan Aktif</p></div></div>
-      <div class="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm flex items-center gap-3"><div class="stat-icon bg-amber-50 text-amber-600"><i class="fas fa-star"></i></div><div><p class="text-xl font-extrabold text-slate-900 font-display leading-tight">New</p><p class="text-slate-500 text-[11px] font-medium">Member</p></div></div>
+      <!-- Right Column: Single Large Hero Image -->
+      <div class="lg:col-span-5">
+        <div class="relative h-72 sm:h-96 w-full rounded-[20px] overflow-hidden shadow-lg border border-slate-100">
+          <img src="/image/mie_gacoan.png" alt="Mie Pedas Hero" class="w-full h-full object-cover transform hover:scale-105 transition duration-700" />
+          <div class="absolute inset-0 bg-gradient-to-t from-slate-900/40 via-transparent to-transparent"></div>
+          <div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md p-3.5 rounded-[16px] border border-white/40 shadow-sm flex items-center justify-between">
+            <div>
+              <p class="text-xs font-bold text-slate-900">Mie Gacoan Original</p>
+              <p class="text-[11px] text-orange-600 font-semibold">Menu Terpopuler Hari Ini</p>
+            </div>
+            <span class="text-xs font-bold text-slate-900 bg-orange-50 px-2.5 py-1 rounded-full text-orange-600">Rp 14.000</span>
+          </div>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
 
-<!-- Menu -->
-<section id="menu" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14">
-  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-8">
-    <div class="fade-in-up">
-      <p class="text-orange-600 text-xs font-bold uppercase tracking-widest mb-1">Our Menu</p>
-      <h2 class="font-display text-2xl sm:text-3xl font-extrabold text-slate-900">Menu Mie Level 🍜</h2>
-      <p class="text-slate-500 text-sm mt-1">Pilih tingkat kepedasan sesuai selera dan keberanianmu</p>
+<!-- Menu Showcase Section -->
+<section id="menuSection" class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+  
+  <!-- Header & Controls Bar -->
+  <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+    <div>
+      <h2 class="font-display text-2xl font-bold text-slate-900">Daftar Menu Spesial</h2>
+      <p class="text-slate-500 text-xs sm:text-sm mt-1">Pilih hidangan favoritmu dan klik untuk mengatur tingkat kepedasan & topping</p>
     </div>
-    <div class="hidden sm:flex items-center gap-2">
-      <button class="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-fire text-orange-500 text-xs"></i> Terpopuler</button>
-      <button class="btn-secondary px-4 py-2 rounded-xl text-xs font-semibold flex items-center gap-1.5"><i class="fas fa-sort-amount-up text-slate-400 text-xs"></i> Harga</button>
+
+    <!-- Controls: Search & Category Tabs -->
+    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+      <div class="relative w-full sm:w-64">
+        <span class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400"><i class="fas fa-search text-xs"></i></span>
+        <input type="text" id="searchInput" onkeyup="filterMenuSearch(this.value)" placeholder="Cari nama menu..." class="w-full pl-9 pr-4 py-2.5 text-xs bg-white border border-slate-200 rounded-[14px] focus:border-orange-500 focus:outline-none shadow-sm" />
+      </div>
+
+      <select id="sortSelect" onchange="sortProducts(this.value)" class="bg-white border border-slate-200 rounded-[14px] px-3.5 py-2.5 text-xs font-medium text-slate-700 focus:outline-none focus:border-orange-500 shadow-sm">
+        <option value="default">Urutan Default</option>
+        <option value="price-asc">Harga: Terrendah</option>
+        <option value="price-desc">Harga: Tertinggi</option>
+        <option value="name">Nama Menu A-Z</option>
+      </select>
     </div>
   </div>
-  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">${productCards}</div>
+
+  <!-- Category Tabs -->
+  <div class="flex items-center gap-2 overflow-x-auto pb-4 scrollbar-none mb-8">
+    <button onclick="setCategoryFilter('all')" id="tab-all" class="category-tab active px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all shadow-sm bg-orange-500 text-white flex-shrink-0">
+      Semua Menu
+    </button>
+    <button onclick="setCategoryFilter('mie')" id="tab-mie" class="category-tab px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-500 flex-shrink-0">
+      Mie Pedas
+    </button>
+    <button onclick="setCategoryFilter('dimsum')" id="tab-dimsum" class="category-tab px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-500 flex-shrink-0">
+      Dimsum & Cemilan
+    </button>
+    <button onclick="setCategoryFilter('minuman')" id="tab-minuman" class="category-tab px-5 py-2.5 rounded-[14px] text-xs font-semibold transition-all bg-white border border-slate-200 text-slate-700 hover:border-orange-500 hover:text-orange-500 flex-shrink-0">
+      Minuman Segar
+    </button>
+  </div>
+
+  <!-- Product Cards Grid -->
+  <div id="productGrid" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+    <!-- Rendered dynamically by JavaScript -->
+  </div>
+
+  <!-- Empty State fallback -->
+  <div id="emptyState" class="hidden text-center py-16 bg-white rounded-[20px] border border-slate-200 shadow-sm mt-4">
+    <div class="w-12 h-12 bg-orange-50 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-3 text-lg">
+      <i class="fas fa-search"></i>
+    </div>
+    <h3 class="font-bold text-slate-800 text-sm">Menu Tidak Ditemukan</h3>
+    <p class="text-slate-500 text-xs mt-1">Coba kata kunci pencarian lain atau ubah kategori.</p>
+    <button onclick="resetFilters()" class="btn-secondary mt-4 px-4 py-2 rounded-[12px] text-xs font-semibold text-orange-600">Reset Filter</button>
+  </div>
 </section>
 
-<!-- CTA Banner -->
-<section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-10">
-  <div class="bg-gradient-to-r from-orange-500 to-amber-500 rounded-3xl p-8 sm:p-12 relative overflow-hidden fade-in-up">
-    <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-32 translate-x-32"></div>
-    <div class="absolute bottom-0 left-0 w-48 h-48 bg-white/10 rounded-full translate-y-24 -translate-x-24"></div>
-    <div class="relative z-10 flex flex-col sm:flex-row items-center justify-between gap-6">
-      <div><h3 class="font-display text-2xl font-extrabold text-white">Tantang Dirimu! 🔥</h3><p class="text-orange-100 text-sm mt-1 max-w-md">Sudah siap naik ke level berikutnya? Coba Mie Level 10 - Level Neraka dan buktikan keberanianmu!</p></div>
-      <button class="flex-shrink-0 bg-white text-orange-700 font-bold px-6 py-3 rounded-xl text-sm shadow-lg hover:shadow-xl transition-all hover:-translate-y-0.5">Pesan Level 10 💀</button>
+<!-- Food Detail Slide-Over Panel / Drawer -->
+<div id="drawerOverlay" onclick="closeFoodDetailDrawer()" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+<aside id="foodDetailDrawer" class="detail-drawer fixed top-0 right-0 h-full w-full max-w-lg bg-white z-50 shadow-2xl flex flex-col translate-x-full overflow-hidden">
+  
+  <!-- Drawer Header with Close -->
+  <div class="p-4 border-b border-slate-100 flex items-center justify-between bg-white z-10">
+    <span class="text-xs font-semibold text-slate-500">Detail Menu</span>
+    <button onclick="closeFoodDetailDrawer()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center text-xs transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Drawer Scrollable Content -->
+  <div class="flex-1 overflow-y-auto p-6 space-y-6">
+    <!-- Large Image Banner -->
+    <div class="relative h-56 w-full rounded-[20px] overflow-hidden bg-slate-100 shadow-sm">
+      <img id="drawerImage" src="" class="w-full h-full object-cover" />
+      <span id="drawerBadge" class="absolute top-3 left-3 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm"></span>
+      <span id="drawerRating" class="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-slate-800 text-xs font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">
+        <i class="fas fa-star text-amber-400"></i> <span id="drawerRatingVal">4.9</span>
+      </span>
+    </div>
+
+    <!-- Title, Price, Description -->
+    <div>
+      <div class="flex items-center justify-between mb-1">
+        <h3 id="drawerName" class="font-display text-xl font-bold text-slate-900"></h3>
+        <span id="drawerPrice" class="font-display text-lg font-bold text-orange-600"></span>
+      </div>
+      <p id="drawerSubtitle" class="text-xs text-orange-600 font-medium mb-2"></p>
+      <p id="drawerDesc" class="text-xs text-slate-500 leading-relaxed"></p>
+    </div>
+
+    <!-- Estimated Prep Time & Portion Info -->
+    <div class="grid grid-cols-2 gap-3 pt-2">
+      <div class="flex items-center gap-2.5 bg-slate-50 p-3 rounded-[14px] border border-slate-100">
+        <i class="far fa-clock text-orange-500 text-sm"></i>
+        <div>
+          <span class="text-[10px] text-slate-400 block font-medium">Estimasi Waktu</span>
+          <span id="drawerPrepTime" class="text-xs font-bold text-slate-800">10 - 15 Menit</span>
+        </div>
+      </div>
+
+      <div class="flex items-center gap-2.5 bg-slate-50 p-3 rounded-[14px] border border-slate-100">
+        <i class="fas fa-utensils text-orange-500 text-sm"></i>
+        <div>
+          <span class="text-[10px] text-slate-400 block font-medium">Porsi</span>
+          <span id="drawerPortion" class="text-xs font-bold text-slate-800">1 Porsi (250g)</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Spice Level Selection Cards (Noodle Category Only) -->
+    <div id="drawerSpiceContainer" class="space-y-3 pt-4 border-t border-slate-100">
+      <div class="flex items-center justify-between">
+        <label class="block text-xs font-bold text-slate-900">Pilih Level Pedas</label>
+        <span id="drawerSelectedSpiceLabel" class="text-xs font-semibold text-orange-600">Level 0 (Tidak Pedas)</span>
+      </div>
+
+      <div class="space-y-2" id="drawerSpiceCards">
+        <!-- Spice level cards rendered dynamically -->
+      </div>
+    </div>
+
+    <!-- Optional Toppings Checkboxes -->
+    <div class="space-y-3 pt-4 border-t border-slate-100">
+      <label class="block text-xs font-bold text-slate-900">Topping Tambahan (Opsional)</label>
+      <div class="space-y-2" id="drawerToppingsList">
+        <!-- Rendered dynamically -->
+      </div>
     </div>
   </div>
-</section>
+
+  <!-- Sticky Bottom Action Bar -->
+  <div class="p-5 border-t border-slate-100 bg-white space-y-3 shadow-lg z-10">
+    <div class="flex items-center justify-between gap-4">
+      
+      <!-- Quantity Selector -->
+      <div class="flex items-center border border-slate-200 rounded-[14px] overflow-hidden bg-slate-50">
+        <button onclick="changeDrawerQty(-1)" class="px-3.5 py-2 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors">-</button>
+        <span id="drawerQtyVal" class="px-3 py-2 text-xs font-bold text-slate-900">1</span>
+        <button onclick="changeDrawerQty(1)" class="px-3.5 py-2 text-slate-600 hover:bg-slate-200 text-xs font-bold transition-colors">+</button>
+      </div>
+
+      <!-- Sticky Add to Cart Button -->
+      <button onclick="confirmDrawerAddToCart()" class="btn-primary flex-1 py-3.5 rounded-[14px] text-xs font-semibold shadow-md flex items-center justify-center gap-2">
+        <i class="fas fa-shopping-bag text-xs"></i>
+        <span>Tambah - <span id="drawerTotalPrice">Rp 0</span></span>
+      </button>
+    </div>
+  </div>
+</aside>
+
+<!-- Shopping Cart Slide-over Drawer -->
+<div id="cartOverlay" onclick="toggleCartDrawer()" class="cart-overlay fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 opacity-0 pointer-events-none transition-opacity duration-300"></div>
+
+<aside id="cartDrawer" class="cart-drawer fixed top-0 right-0 h-full w-full max-w-md bg-white z-50 shadow-2xl flex flex-col translate-x-full">
+  <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50">
+    <div class="flex items-center gap-2.5">
+      <div class="w-9 h-9 bg-orange-100 text-orange-600 rounded-[12px] flex items-center justify-center font-bold text-sm">
+        <i class="fas fa-shopping-bag"></i>
+      </div>
+      <div>
+        <h3 class="font-bold text-slate-800 text-xs">Keranjang Pesanan</h3>
+        <p class="text-[10px] text-slate-400"><span id="cartTotalItemsCount">0</span> item terpilih</p>
+      </div>
+    </div>
+    <button onclick="toggleCartDrawer()" class="w-8 h-8 rounded-full bg-slate-200/80 hover:bg-slate-300 text-slate-600 flex items-center justify-center text-xs transition-colors">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <div id="cartItemsContainer" class="flex-1 overflow-y-auto p-5 space-y-3">
+    <!-- Cart Items rendered dynamically -->
+  </div>
+
+  <div class="p-5 border-t border-slate-100 bg-white space-y-3 shadow-lg">
+    <div class="space-y-1.5 text-xs text-slate-500">
+      <div class="flex justify-between"><span>Subtotal Produk</span><span id="cartSubtotal" class="font-bold text-slate-800">Rp 0</span></div>
+      <div class="flex justify-between"><span>Biaya Layanan</span><span class="font-bold text-emerald-600">GRATIS</span></div>
+      <div class="flex justify-between text-sm font-bold text-slate-900 pt-2 border-t border-slate-100">
+        <span>Total Pembayaran</span>
+        <span id="cartTotal" class="text-orange-600">Rp 0</span>
+      </div>
+    </div>
+
+    <button id="checkoutBtn" onclick="processCheckout()" class="btn-primary w-full py-3.5 font-semibold rounded-[14px] text-xs shadow-md flex items-center justify-center gap-2">
+      <span>Konfirmasi Pesanan</span>
+      <i class="fas fa-arrow-right text-xs"></i>
+    </button>
+  </div>
+</aside>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast" role="alert"></div>
 
 <!-- Footer -->
-<footer class="border-t border-slate-100 bg-white py-8 mt-4">
+<footer class="border-t border-slate-200 bg-white py-8 mt-12">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
     <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-      <div class="flex items-center gap-2.5"><div class="w-8 h-8 bg-gradient-to-br from-orange-500 to-amber-500 rounded-lg flex items-center justify-center"><span class="text-sm">🍜</span></div><span class="font-display text-sm font-bold text-slate-800">Mie Level</span></div>
-      <div class="flex items-center gap-6 text-xs text-slate-400"><span>&copy; 2026 Mie Level</span><span class="hidden sm:inline">&bull;</span><span class="hidden sm:inline">Made with 🔥 in Indonesia</span></div>
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 bg-orange-500 rounded-[10px] flex items-center justify-center text-white text-xs font-bold shadow-sm">M</div>
+        <div>
+          <span class="font-display text-xs font-bold text-slate-900">Mie Level</span>
+          <p class="text-[10px] text-slate-400">Authentic Spicy Noodle Experience</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-6 text-xs text-slate-400">
+        <span>&copy; 2026 Mie Level</span>
+        <span>&bull;</span>
+        <span>Premium Food Ordering</span>
+      </div>
     </div>
   </div>
 </footer>
+
+<script>
+// Repository Data
+const productsData = ${productsJson};
+const toppingsData = ${toppingsJson};
+
+const spiceLevelsConfig = [
+  { levelId: 0, title: "Level 0 (Tidak Pedas)", chilis: 0, desc: "Original gurih tanpa rasa pedas" },
+  { levelId: 1, title: "Level 1–2 (Ringan)", chilis: 1, desc: "Pedas samar yang pas untuk pemula" },
+  { levelId: 2, title: "Level 3–4 (Sedang)", chilis: 2, desc: "Pedas sedang yang bikin ketagihan" },
+  { levelId: 3, title: "Level 5–6 (Pedas)", chilis: 3, desc: "Pedas mantap untuk pecinta tantangan" },
+  { levelId: 4, title: "Level 7–8 (Extra Pedas)", chilis: 4, desc: "Sensasi pedas murni level tertinggi" },
+];
+
+let activeCategory = 'all';
+let currentSearch = '';
+let currentSort = 'default';
+let cart = [];
+
+// Drawer Transient State
+let activeDrawerItem = null;
+let activeDrawerQty = 1;
+let activeDrawerSpiceId = 0;
+let activeDrawerToppings = [];
+
+// Initialize Page
+document.addEventListener('DOMContentLoaded', () => {
+  renderProducts();
+});
+
+function showToast(msg, type='success') {
+  const t = document.getElementById('toast');
+  t.className = 'toast toast-' + type + ' show';
+  t.innerHTML = '<span>' + msg + '</span>';
+  setTimeout(() => t.classList.remove('show'), 3500);
+}
+
+function scrollToMenu() {
+  document.getElementById('menuSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+// Render Products Grid
+function renderProducts() {
+  const grid = document.getElementById('productGrid');
+  const empty = document.getElementById('emptyState');
+
+  let filtered = productsData.filter(p => {
+    const matchCat = activeCategory === 'all' || p.category === activeCategory;
+    const matchSearch = p.name.toLowerCase().includes(currentSearch.toLowerCase()) || 
+                        p.subtitle.toLowerCase().includes(currentSearch.toLowerCase()) ||
+                        p.desc.toLowerCase().includes(currentSearch.toLowerCase());
+    return matchCat && matchSearch;
+  });
+
+  if (currentSort === 'price-asc') {
+    filtered.sort((a, b) => a.price - b.price);
+  } else if (currentSort === 'price-desc') {
+    filtered.sort((a, b) => b.price - a.price);
+  } else if (currentSort === 'name') {
+    filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  if (filtered.length === 0) {
+    grid.innerHTML = '';
+    empty.classList.remove('hidden');
+    return;
+  }
+  empty.classList.add('hidden');
+
+  grid.innerHTML = filtered.map(p => {
+    return '<div class="card-premium overflow-hidden flex flex-col group border border-slate-100 cursor-pointer" data-id="' + p.id + '" onclick="openFoodDetailDrawer(this.dataset.id)">' +
+      '<div class="relative h-52 bg-slate-100 overflow-hidden">' +
+        '<img src="' + p.image + '" alt="' + p.name + '" class="w-full h-full object-cover transform group-hover:scale-105 transition-transform duration-500 ease-out"/>' +
+        '<span class="absolute top-3 left-3 ' + p.badgeColor + ' px-3 py-1 rounded-full text-[10px] font-bold shadow-sm">' + p.badge + '</span>' +
+        '<span class="absolute top-3 right-3 bg-white/90 backdrop-blur-md text-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full shadow-sm flex items-center gap-1">' +
+          '<i class="fas fa-star text-amber-400"></i> ' + p.rating +
+        '</span>' +
+      '</div>' +
+      '<div class="p-5 flex-1 flex flex-col justify-between">' +
+        '<div>' +
+          '<h3 class="font-display text-base font-bold text-slate-900 group-hover:text-orange-600 transition-colors">' + p.name + '</h3>' +
+          '<p class="text-slate-500 text-xs mt-1 line-clamp-2 leading-relaxed">' + p.subtitle + '</p>' +
+        '</div>' +
+        '<div class="pt-4 border-t border-slate-100 flex items-center justify-between mt-4">' +
+          '<span class="font-display text-base font-bold text-slate-900">Rp ' + p.priceFormatted + '</span>' +
+          '<span class="text-xs font-semibold text-orange-600 hover:text-orange-700 flex items-center gap-1">Pesan <i class="fas fa-chevron-right text-[10px]"></i></span>' +
+        '</div>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Category Tabs
+function setCategoryFilter(cat) {
+  activeCategory = cat;
+  document.querySelectorAll('.category-tab').forEach(btn => {
+    btn.classList.remove('bg-orange-500', 'text-white', 'shadow-sm');
+    btn.classList.add('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+  });
+
+  const activeBtn = document.getElementById('tab-' + cat);
+  if (activeBtn) {
+    activeBtn.classList.remove('bg-white', 'border', 'border-slate-200', 'text-slate-700');
+    activeBtn.classList.add('bg-orange-500', 'text-white', 'shadow-sm');
+  }
+  renderProducts();
+}
+
+function filterMenuSearch(val) {
+  currentSearch = val;
+  renderProducts();
+}
+
+function sortProducts(val) {
+  currentSort = val;
+  renderProducts();
+}
+
+function resetFilters() {
+  currentSearch = '';
+  currentSort = 'default';
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchInputNav').value = '';
+  document.getElementById('sortSelect').value = 'default';
+  setCategoryFilter('all');
+}
+
+// Food Detail Drawer Handlers
+function openFoodDetailDrawer(id) {
+  const item = productsData.find(p => p.id === id);
+  if (!item) return;
+
+  activeDrawerItem = item;
+  activeDrawerQty = 1;
+  activeDrawerSpiceId = 0;
+  activeDrawerToppings = [];
+
+  document.getElementById('drawerImage').src = item.image;
+  document.getElementById('drawerName').innerText = item.name;
+  document.getElementById('drawerPrice').innerText = 'Rp ' + item.priceFormatted;
+  document.getElementById('drawerSubtitle').innerText = item.subtitle;
+  document.getElementById('drawerDesc').innerText = item.desc;
+  document.getElementById('drawerPrepTime').innerText = item.prepTime;
+  document.getElementById('drawerPortion').innerText = item.portion;
+  document.getElementById('drawerRatingVal').innerText = item.rating;
+
+  const badge = document.getElementById('drawerBadge');
+  badge.innerText = item.badge;
+  badge.className = 'absolute top-3 left-3 text-white text-[10px] font-bold px-3 py-1 rounded-full shadow-sm ' + item.badgeColor;
+
+  // Spice Levels (Shown only if category === 'mie')
+  const spiceContainer = document.getElementById('drawerSpiceContainer');
+  if (item.category === 'mie') {
+    spiceContainer.classList.remove('hidden');
+    renderDrawerSpiceCards();
+  } else {
+    spiceContainer.classList.add('hidden');
+  }
+
+  renderDrawerToppings();
+  updateDrawerTotalPrice();
+
+  const drawer = document.getElementById('foodDetailDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  drawer.classList.add('open');
+  overlay.classList.remove('opacity-0', 'pointer-events-none');
+}
+
+function closeFoodDetailDrawer() {
+  const drawer = document.getElementById('foodDetailDrawer');
+  const overlay = document.getElementById('drawerOverlay');
+  drawer.classList.remove('open');
+  overlay.classList.add('opacity-0', 'pointer-events-none');
+}
+
+function renderDrawerSpiceCards() {
+  const container = document.getElementById('drawerSpiceCards');
+  container.innerHTML = spiceLevelsConfig.map(s => {
+    const isSel = s.levelId === activeDrawerSpiceId;
+    let chilisHtml = '';
+    for (let i = 0; i < s.chilis; i++) {
+      chilisHtml += '<i class="fas fa-pepper-hot text-xs text-red-500"></i> ';
+    }
+    if (s.chilis === 0) {
+      chilisHtml = '<span class="text-xs text-slate-400">Non-Pedas</span>';
+    }
+
+    const borderCls = isSel ? 'border-2 border-orange-500 bg-orange-50/80 shadow-sm' : 'border border-slate-200 bg-white hover:border-orange-300';
+    return '<div data-spiceid="' + s.levelId + '" onclick="selectDrawerSpice(parseInt(this.dataset.spiceid))" class="p-3 rounded-[14px] cursor-pointer transition-all flex items-center justify-between ' + borderCls + '">' +
+      '<div>' +
+        '<p class="text-xs font-bold text-slate-900">' + s.title + '</p>' +
+        '<p class="text-[11px] text-slate-500 mt-0.5">' + s.desc + '</p>' +
+      '</div>' +
+      '<div class="flex items-center gap-1">' + chilisHtml + '</div>' +
+    '</div>';
+  }).join('');
+
+  const selConfig = spiceLevelsConfig.find(s => s.levelId === activeDrawerSpiceId);
+  document.getElementById('drawerSelectedSpiceLabel').innerText = selConfig ? selConfig.title : '';
+}
+
+function selectDrawerSpice(spiceId) {
+  activeDrawerSpiceId = spiceId;
+  renderDrawerSpiceCards();
+}
+
+function renderDrawerToppings() {
+  const container = document.getElementById('drawerToppingsList');
+  container.innerHTML = toppingsData.map(t => {
+    const isChecked = activeDrawerToppings.includes(t.id);
+    const bgCls = isChecked ? 'bg-orange-50/60 border-orange-400 shadow-sm' : 'bg-white border-slate-200 hover:border-slate-300';
+    
+    return '<div data-toppingid="' + t.id + '" onclick="toggleDrawerTopping(this.dataset.toppingid)" class="p-3 rounded-[14px] border cursor-pointer flex items-center justify-between transition-all ' + bgCls + '">' +
+      '<div class="flex items-center gap-2.5">' +
+        '<div class="w-4 h-4 rounded border flex items-center justify-center ' + (isChecked ? 'bg-orange-500 border-orange-500 text-white' : 'border-slate-300 bg-white') + '"><i class="fas fa-check text-[10px] ' + (isChecked ? '' : 'hidden') + '"></i></div>' +
+        '<span class="text-xs font-medium text-slate-900">' + t.name + '</span>' +
+      '</div>' +
+      '<span class="text-xs font-semibold text-orange-600">' + t.priceFormatted + '</span>' +
+    '</div>';
+  }).join('');
+}
+
+function toggleDrawerTopping(topId) {
+  if (activeDrawerToppings.includes(topId)) {
+    activeDrawerToppings = activeDrawerToppings.filter(id => id !== topId);
+  } else {
+    activeDrawerToppings.push(topId);
+  }
+  renderDrawerToppings();
+  updateDrawerTotalPrice();
+}
+
+function changeDrawerQty(delta) {
+  activeDrawerQty = Math.max(1, activeDrawerQty + delta);
+  document.getElementById('drawerQtyVal').innerText = activeDrawerQty;
+  updateDrawerTotalPrice();
+}
+
+function updateDrawerTotalPrice() {
+  if (!activeDrawerItem) return;
+
+  let unitPrice = activeDrawerItem.price;
+  activeDrawerToppings.forEach(topId => {
+    const t = toppingsData.find(x => x.id === topId);
+    if (t) unitPrice += t.price;
+  });
+
+  const total = unitPrice * activeDrawerQty;
+  document.getElementById('drawerTotalPrice').innerText = 'Rp ' + total.toLocaleString('id-ID');
+}
+
+function confirmDrawerAddToCart() {
+  if (!activeDrawerItem) return;
+
+  const spiceObj = spiceLevelsConfig.find(s => s.levelId === activeDrawerSpiceId);
+  const selectedToppingsObjs = activeDrawerToppings.map(topId => toppingsData.find(x => x.id === topId)).filter(Boolean);
+
+  let unitPrice = activeDrawerItem.price;
+  selectedToppingsObjs.forEach(t => unitPrice += t.price);
+
+  const cartItemId = activeDrawerItem.id + '-sp' + activeDrawerSpiceId + '-' + activeDrawerToppings.sort().join('_');
+
+  const existing = cart.find(c => c.cartItemId === cartItemId);
+  if (existing) {
+    existing.qty += activeDrawerQty;
+  } else {
+    cart.push({
+      cartItemId: cartItemId,
+      id: activeDrawerItem.id,
+      name: activeDrawerItem.name,
+      image: activeDrawerItem.image,
+      unitPrice: unitPrice,
+      qty: activeDrawerQty,
+      spiceTitle: (activeDrawerItem.category === 'mie' && spiceObj) ? spiceObj.title : null,
+      toppings: selectedToppingsObjs.map(t => t.name)
+    });
+  }
+
+  showToast(activeDrawerItem.name + ' berhasil ditambahkan ke keranjang!', 'success');
+  closeFoodDetailDrawer();
+  updateCartUI();
+}
+
+// Cart Drawer Handlers
+function toggleCartDrawer() {
+  const drawer = document.getElementById('cartDrawer');
+  const overlay = document.getElementById('cartOverlay');
+  const isOpen = drawer.classList.contains('open');
+
+  if (isOpen) {
+    drawer.classList.remove('open');
+    overlay.classList.add('opacity-0', 'pointer-events-none');
+  } else {
+    updateCartUI();
+    drawer.classList.add('open');
+    overlay.classList.remove('opacity-0', 'pointer-events-none');
+  }
+}
+
+function updateCartUI() {
+  const totalItems = cart.reduce((sum, item) => sum + item.qty, 0);
+  document.getElementById('cartCountBadge').innerText = totalItems;
+  document.getElementById('cartTotalItemsCount').innerText = totalItems;
+
+  const container = document.getElementById('cartItemsContainer');
+  if (cart.length === 0) {
+    container.innerHTML = '<div class="text-center py-12 text-slate-400">' +
+        '<i class="fas fa-shopping-basket text-3xl mb-3 text-slate-300 block"></i>' +
+        '<p class="text-xs font-medium">Keranjang belanja masih kosong.</p>' +
+      '</div>';
+    document.getElementById('cartSubtotal').innerText = 'Rp 0';
+    document.getElementById('cartTotal').innerText = 'Rp 0';
+    return;
+  }
+
+  let subtotal = 0;
+  container.innerHTML = cart.map(item => {
+    const itemTotal = item.unitPrice * item.qty;
+    subtotal += itemTotal;
+
+    const spiceTag = item.spiceTitle ? '<span class="inline-block bg-orange-50 text-orange-600 text-[10px] font-semibold px-2 py-0.5 rounded-md mt-0.5">' + item.spiceTitle + '</span>' : '';
+    const toppingTag = item.toppings && item.toppings.length > 0 ? '<p class="text-[10px] text-slate-400 mt-0.5">Topping: ' + item.toppings.join(', ') + '</p>' : '';
+
+    return '<div class="flex items-center gap-3 p-3.5 bg-slate-50 border border-slate-200/80 rounded-[16px]">' +
+        '<img src="' + item.image + '" class="w-14 h-14 object-cover rounded-[12px] border border-slate-200/50 flex-shrink-0"/>' +
+        '<div class="flex-1 min-w-0">' +
+          '<h4 class="font-bold text-xs text-slate-900 truncate">' + item.name + '</h4>' +
+          spiceTag +
+          toppingTag +
+          '<p class="text-xs font-bold text-slate-800 mt-1">Rp ' + itemTotal.toLocaleString('id-ID') + '</p>' +
+        '</div>' +
+        '<div class="flex items-center border border-slate-200 rounded-[10px] overflow-hidden bg-white">' +
+          '<button data-id="' + item.cartItemId + '" onclick="updateCartQty(this.dataset.id, -1)" class="px-2.5 py-1 text-slate-600 hover:bg-slate-100 text-[10px] font-bold">-</button>' +
+          '<span class="px-2 py-1 text-xs font-bold text-slate-800">' + item.qty + '</span>' +
+          '<button data-id="' + item.cartItemId + '" onclick="updateCartQty(this.dataset.id, 1)" class="px-2.5 py-1 text-slate-600 hover:bg-slate-100 text-[10px] font-bold">+</button>' +
+        '</div>' +
+      '</div>';
+  }).join('');
+
+  document.getElementById('cartSubtotal').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+  document.getElementById('cartTotal').innerText = 'Rp ' + subtotal.toLocaleString('id-ID');
+}
+
+function updateCartQty(cartItemId, delta) {
+  const item = cart.find(c => c.cartItemId === cartItemId);
+  if (!item) return;
+
+  item.qty += delta;
+  if (item.qty <= 0) {
+    cart = cart.filter(c => c.cartItemId !== cartItemId);
+  }
+  updateCartUI();
+}
+
+function processCheckout() {
+  if (cart.length === 0) {
+    showToast('Keranjangmu masih kosong! Silakan pilih menu terlebih dahulu.', 'error');
+    return;
+  }
+
+  showToast('Pesanan berhasil dibuat! Tim Mie Level sedang menyiapkan hidanganmu', 'success');
+  cart = [];
+  updateCartUI();
+  toggleCartDrawer();
+}
+</script>
 
 </body></html>`;
 }
