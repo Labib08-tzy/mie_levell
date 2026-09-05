@@ -1,0 +1,40 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer components {
+  .btn-primary {
+    @apply bg-brand-500 text-white transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)];
+  }
+  .btn-primary:hover {
+    @apply bg-brand-600 scale-[1.02] shadow-orange;
+  }
+  .btn-primary:active {
+    @apply scale-[0.98];
+  }
+
+  .btn-secondary {
+    @apply bg-white border-[1.5px] border-slate-200 text-slate-700 transition-all duration-300 ease-out;
+  }
+  .btn-secondary:hover {
+    @apply border-brand-500 text-brand-500 bg-brand-50 scale-[1.02];
+  }
+  .btn-secondary:active {
+    @apply scale-[0.98];
+  }
+
+  .input-modern {
+    @apply transition-all duration-300 ease-out bg-slate-50;
+  }
+  .input-modern:focus {
+    @apply outline-none border-brand-500 bg-white ring-4 ring-brand-500/10;
+  }
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+    display: none;
+}
+.scrollbar-hide {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+}

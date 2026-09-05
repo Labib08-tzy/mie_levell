@@ -1,5 +1,7 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
+// ============================================================
+// Mie Level - Prisma Schema
+// Food Ordering App Database Schema
+// ============================================================
 
 generator client {
   provider = "prisma-client-js"
@@ -10,11 +12,170 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// ============================================================
+// USER
+// Menyimpan data pelanggan yang mendaftar di aplikasi
+// ============================================================
 model User {
   id        Int      @id @default(autoincrement())
   nama      String
   email     String   @unique
   password  String
-  role      String   @default("USER")
+  role      String   @default("Member")
   createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi: satu user bisa punya banyak Cart
+  carts Cart[]
+
+  @@map("users")
 }
+
+// ============================================================
+// CATEGORY
+// Kategori menu makanan (ex: Mie Pedas, Dimsum & Cemilan, Minuman Segar)
+// ============================================================
+model Category {
+  id        Int      @id @default(autoincrement())
+  nama      String   @unique
+  icon      String?  // emoji atau URL icon kategori
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relasi: satu kategori punya banyak produk
+  products Product[]
+
+  @@map("categories")
+}
+
+// ============================================================
+// PRODUCT
+// Menu makanan utama
+// ============================================================
+model Product {
+  id          Int     @id @default(autoincrement())
+  nama        String
+  deskripsi   String? // ex: "Pedas Asin Gurih"
+  harga       Int     // dalam Rupiah, ex: 15000
+  gambarUrl   String? // URL gambar produk
+  rating      Float   @default(0.0) // ex: 4.9
+  badge       String? // ex: "Best Seller", "Favorite", "Must Try"
+  stok        Int     @default(0)
+  isAvailable Boolean @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Foreign Key ke Category
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // Relasi: satu produk bisa ada di banyak CartItem
+  cartItems CartItem[]
+
+  @@map("products")
+}
+
+// ============================================================
+// SPICINESS LEVEL (Tingkat Kepedasan)
+// User WAJIB memilih level pedas sebelum add to cart
+// ============================================================
+model SpicinessLevel {
+  id         Int     @id @default(autoincrement())
+  label      String  @unique // ex: "Level 0 - Tidak Pedas", "Level 3 - Pedas"
+  level      Int     @unique // angka urutan 0-5
+  deskripsi  String? // ex: "Cocok untuk yang tidak suka pedas"
+  extraHarga Int     @default(0) // harga tambahan jika ada (biasanya 0)
+
+  // Relasi: satu spiciness level dipilih di banyak CartItem
+  cartItems CartItem[]
+
+  @@map("spiciness_levels")
+}
+
+// ============================================================
+// TOPPING
+// Opsi tambahan topping dengan harga tambahan
+// ex: Ceker (+3.000), Telur (+3.000), Kerupuk (+2.000)
+// ============================================================
+model Topping {
+  id          Int     @id @default(autoincrement())
+  nama        String  @unique // ex: "Ceker", "Telur Rebus"
+  harga       Int     @default(0) // harga tambahan dalam Rupiah
+  gambarUrl   String? // opsional
+  isAvailable Boolean @default(true)
+
+  // Relasi: topping bisa dipilih di banyak CartItem (many-to-many)
+  cartItemToppings CartItemTopping[]
+
+  @@map("toppings")
+}
+
+// ============================================================
+// CART
+// Keranjang belanja milik satu user
+// ============================================================
+model Cart {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign Key ke User
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+
+  // Relasi: satu cart punya banyak CartItem
+  items CartItem[]
+
+  @@map("carts")
+}
+
+// ============================================================
+// CART ITEM
+// Setiap item dalam keranjang belanja
+// Menyimpan: produk, jumlah, level pedas, dan topping yang dipilih
+// ============================================================
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  quantity  Int      @default(1)
+  catatan   String?  // catatan khusus dari user untuk item ini
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Foreign Key ke Cart
+  cartId Int
+  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
+
+  // Foreign Key ke Product
+  productId Int
+  product   Product @relation(fields: [productId], references: [id])
+
+  // Foreign Key ke SpicinessLevel (WAJIB dipilih)
+  spicinessLevelId Int
+  spicinessLevel   SpicinessLevel @relation(fields: [spicinessLevelId], references: [id])
+
+  // Relasi many-to-many ke Topping (via tabel pivot CartItemTopping)
+  toppings CartItemTopping[]
+
+  @@map("cart_items")
+}
+
+// ============================================================
+// CART ITEM TOPPING (Pivot Table)
+// Tabel penghubung many-to-many antara CartItem dan Topping
+// Satu CartItem bisa punya lebih dari 1 topping
+// ============================================================
+model CartItemTopping {
+  id Int @id @default(autoincrement())
+
+  // Foreign Key ke CartItem
+  cartItemId Int
+  cartItem   CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+
+  // Foreign Key ke Topping
+  toppingId Int
+  topping   Topping @relation(fields: [toppingId], references: [id])
+
+  @@unique([cartItemId, toppingId]) // satu item tidak bisa pilih topping yang sama 2x
+  @@map("cart_item_toppings")
+}
+
