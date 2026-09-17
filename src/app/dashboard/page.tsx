@@ -21,11 +21,10 @@ export default function DashboardPage() {
     async function loadData() {
       try {
         const [userRes, prodsRes, catsRes, spiceRes, toppingsRes] = await Promise.all([
-          // To get user details, we can decode the cookie on the server or provide an endpoint. 
-          // For simplicity here, we assume standard JWT in a mock or an endpoint that we can fetch.
-          // Since we didn't make a /api/auth/me, we'll just mock it based on successful login, 
-          // but a real app would fetch from a profile endpoint.
-          Promise.resolve({ nama: "Member Level", role: "Member" }), // Mock user for now
+          fetch("/api/auth/me").then((r) => r.json()).then((res) => {
+            if (res.success) return res.data;
+            return { nama: "User", role: "Member" };
+          }),
           fetch("/api/products").then((r) => r.json()),
           fetch("/api/categories").then((r) => r.json()),
           fetch("/api/spiciness-levels").then((r) => r.json()),

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useCartStore } from "@/store/cartStore";
 
 function formatRupiah(n: number) {
@@ -20,6 +21,7 @@ export default function CartDrawer() {
     totalPrice,
   } = useCartStore();
 
+  const router = useRouter();
   const drawerRef = useRef<HTMLElement>(null);
 
   // Trap focus and handle Escape key
@@ -233,7 +235,10 @@ export default function CartDrawer() {
             {/* Checkout Button */}
             <button
               className="w-full py-3.5 bg-orange-500 hover:bg-orange-600 active:bg-orange-700 text-white font-semibold text-sm rounded-[14px] shadow-md shadow-orange-500/20 transition-all flex items-center justify-center gap-2"
-              onClick={() => alert("Fitur checkout segera hadir! 🚀")}
+              onClick={() => {
+                closeCart();
+                router.push("/checkout");
+              }}
             >
               <span>Konfirmasi Pesanan</span>
               <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

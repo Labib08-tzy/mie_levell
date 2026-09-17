@@ -39,6 +39,14 @@ export default function Navbar({ userName, userRole }: NavbarProps) {
           {/* Right Controls */}
           <div className="flex items-center gap-3 ml-auto">
 
+            {/* Orders Link */}
+            <Link
+              href="/orders"
+              className="hidden sm:flex items-center gap-1.5 px-3 py-2 text-xs font-semibold text-slate-600 hover:text-orange-600 bg-transparent hover:bg-orange-50 rounded-[12px] transition-colors"
+            >
+              📋 Pesanan
+            </Link>
+
             {/* Cart Button */}
             <button
               onClick={openCart}
