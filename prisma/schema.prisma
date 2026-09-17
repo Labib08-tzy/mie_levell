@@ -1,8 +1,3 @@
-// ============================================================
-// Mie Level - Prisma Schema
-// Food Ordering App Database Schema
-// ============================================================
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -12,257 +7,165 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// ============================================================
-// USER
-// Menyimpan data pelanggan yang mendaftar di aplikasi
-// ============================================================
 model User {
   id        Int      @id @default(autoincrement())
   nama      String
   email     String   @unique
   password  String
-  phone     String?
   role      String   @default("Member")
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  // Relasi: satu user bisa punya banyak Cart
-  carts  Cart[]
-  orders Order[]
+  phone     String?
+  carts     Cart[]
+  orders    Order[]
 
   @@map("users")
 }
 
-// ============================================================
-// CATEGORY
-// Kategori menu makanan (ex: Mie Pedas, Dimsum & Cemilan, Minuman Segar)
-// ============================================================
 model Category {
-  id        Int      @id @default(autoincrement())
-  nama      String   @unique
-  icon      String?  // emoji atau URL icon kategori
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Relasi: satu kategori punya banyak produk
-  products Product[]
+  id        Int       @id @default(autoincrement())
+  nama      String    @unique
+  icon      String?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  products  Product[]
 
   @@map("categories")
 }
 
-// ============================================================
-// PRODUCT
-// Menu makanan utama
-// ============================================================
 model Product {
-  id          Int     @id @default(autoincrement())
+  id          Int         @id @default(autoincrement())
   nama        String
-  deskripsi   String? // ex: "Pedas Asin Gurih"
-  harga       Int     // dalam Rupiah, ex: 15000
-  gambarUrl   String? // URL gambar produk
-  rating      Float   @default(0.0) // ex: 4.9
-  badge       String? // ex: "Best Seller", "Favorite", "Must Try"
-  stok        Int     @default(0)
-  isAvailable Boolean @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-
-  // Foreign Key ke Category
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
-
-  // Relasi: satu produk bisa ada di banyak CartItem
-  cartItems  CartItem[]
-  orderItems OrderItem[]
+  deskripsi   String?
+  harga       Int
+  gambarUrl   String?
+  rating      Float       @default(0.0)
+  badge       String?
+  stok        Int         @default(0)
+  isAvailable Boolean     @default(true)
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  categoryId  Int
+  cartItems   CartItem[]
+  orderItems  OrderItem[]
+  category    Category    @relation(fields: [categoryId], references: [id])
 
   @@map("products")
 }
 
-// ============================================================
-// SPICINESS LEVEL (Tingkat Kepedasan)
-// User WAJIB memilih level pedas sebelum add to cart
-// ============================================================
 model SpicinessLevel {
-  id         Int     @id @default(autoincrement())
-  label      String  @unique // ex: "Level 0 - Tidak Pedas", "Level 3 - Pedas"
-  level      Int     @unique // angka urutan 0-5
-  deskripsi  String? // ex: "Cocok untuk yang tidak suka pedas"
-  extraHarga Int     @default(0) // harga tambahan jika ada (biasanya 0)
-
-  // Relasi: satu spiciness level dipilih di banyak CartItem
+  id         Int         @id @default(autoincrement())
+  label      String      @unique
+  level      Int         @unique
+  deskripsi  String?
+  extraHarga Int         @default(0)
   cartItems  CartItem[]
   orderItems OrderItem[]
 
   @@map("spiciness_levels")
 }
 
-// ============================================================
-// TOPPING
-// Opsi tambahan topping dengan harga tambahan
-// ex: Ceker (+3.000), Telur (+3.000), Kerupuk (+2.000)
-// ============================================================
 model Topping {
-  id          Int     @id @default(autoincrement())
-  nama        String  @unique // ex: "Ceker", "Telur Rebus"
-  harga       Int     @default(0) // harga tambahan dalam Rupiah
-  gambarUrl   String? // opsional
-  isAvailable Boolean @default(true)
-
-  // Relasi: topping bisa dipilih di banyak CartItem (many-to-many)
-  cartItemToppings   CartItemTopping[]
-  orderItemToppings  OrderItemTopping[]
+  id                Int                @id @default(autoincrement())
+  nama              String             @unique
+  harga             Int                @default(0)
+  gambarUrl         String?
+  isAvailable       Boolean            @default(true)
+  cartItemToppings  CartItemTopping[]
+  orderItemToppings OrderItemTopping[]
 
   @@map("toppings")
 }
 
-// ============================================================
-// CART
-// Keranjang belanja milik satu user
-// ============================================================
 model Cart {
-  id        Int      @id @default(autoincrement())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign Key ke User
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  // Relasi: satu cart punya banyak CartItem
-  items CartItem[]
+  id        Int        @id @default(autoincrement())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  userId    Int
+  items     CartItem[]
+  user      User       @relation(fields: [userId], references: [id])
 
   @@map("carts")
 }
 
-// ============================================================
-// CART ITEM
-// Setiap item dalam keranjang belanja
-// Menyimpan: produk, jumlah, level pedas, dan topping yang dipilih
-// ============================================================
 model CartItem {
-  id        Int      @id @default(autoincrement())
-  quantity  Int      @default(1)
-  catatan   String?  // catatan khusus dari user untuk item ini
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-
-  // Foreign Key ke Cart
-  cartId Int
-  cart   Cart @relation(fields: [cartId], references: [id], onDelete: Cascade)
-
-  // Foreign Key ke Product
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-
-  // Foreign Key ke SpicinessLevel (WAJIB dipilih)
+  id               Int               @id @default(autoincrement())
+  quantity         Int               @default(1)
+  catatan          String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  cartId           Int
+  productId        Int
   spicinessLevelId Int
-  spicinessLevel   SpicinessLevel @relation(fields: [spicinessLevelId], references: [id])
-
-  // Relasi many-to-many ke Topping (via tabel pivot CartItemTopping)
-  toppings CartItemTopping[]
+  toppings         CartItemTopping[]
+  cart             Cart              @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  product          Product           @relation(fields: [productId], references: [id])
+  spicinessLevel   SpicinessLevel    @relation(fields: [spicinessLevelId], references: [id])
 
   @@map("cart_items")
 }
 
-// ============================================================
-// CART ITEM TOPPING (Pivot Table)
-// Tabel penghubung many-to-many antara CartItem dan Topping
-// Satu CartItem bisa punya lebih dari 1 topping
-// ============================================================
 model CartItemTopping {
-  id Int @id @default(autoincrement())
-
-  // Foreign Key ke CartItem
+  id         Int      @id @default(autoincrement())
   cartItemId Int
+  toppingId  Int
   cartItem   CartItem @relation(fields: [cartItemId], references: [id], onDelete: Cascade)
+  topping    Topping  @relation(fields: [toppingId], references: [id])
 
-  // Foreign Key ke Topping
-  toppingId Int
-  topping   Topping @relation(fields: [toppingId], references: [id])
-
-  @@unique([cartItemId, toppingId]) // satu item tidak bisa pilih topping yang sama 2x
+  @@unique([cartItemId, toppingId])
   @@map("cart_item_toppings")
 }
 
-// ============================================================
-// ORDER
-// Pesanan yang dibuat oleh user setelah checkout
-// ============================================================
 model Order {
-  id             Int      @id @default(autoincrement())
-  orderNumber    String   @unique
-  customerName   String
-  phone          String
-  orderType      String   // "DINE_IN" | "TAKEAWAY"
-  note           String?
-  subtotal       Int
-  deliveryFee    Int      @default(0)
-  total          Int
-  status         String   @default("PENDING")   // PENDING, CONFIRMED, PROCESSING, READY, COMPLETED, CANCELLED
-  paymentStatus  String   @default("UNPAID")    // UNPAID, PAID, FAILED
-  createdAt      DateTime @default(now())
-  updatedAt      DateTime @updatedAt
-
-  // Foreign Key ke User
-  userId Int
-  user   User @relation(fields: [userId], references: [id])
-
-  // Relasi: satu order punya banyak OrderItem
-  items OrderItem[]
+  id            Int         @id @default(autoincrement())
+  orderNumber   String      @unique
+  customerName  String
+  phone         String
+  orderType     String
+  note          String?
+  subtotal      Int
+  deliveryFee   Int         @default(0)
+  total         Int
+  status        String      @default("PENDING")
+  paymentStatus String      @default("UNPAID")
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  userId        Int
+  items         OrderItem[]
+  user          User        @relation(fields: [userId], references: [id])
 
   @@map("orders")
 }
 
-// ============================================================
-// ORDER ITEM
-// Setiap item dalam pesanan (snapshot harga saat order dibuat)
-// ============================================================
 model OrderItem {
-  id              Int      @id @default(autoincrement())
-  quantity        Int
-  productName     String   // snapshot nama produk
-  price           Int      // snapshot harga produk satuan
-  spicinessLabel  String   // snapshot label level pedas
-  spicinessPrice  Int      @default(0) // snapshot harga ekstra pedas
-  note            String?
-  subtotal        Int      // (price + spicinessPrice + toppingTotal) * quantity
-  createdAt       DateTime @default(now())
-
-  // Foreign Key ke Order
-  orderId Int
-  order   Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
-
-  // Foreign Key ke Product (referensi, bukan sumber harga)
-  productId Int
-  product   Product @relation(fields: [productId], references: [id])
-
-  // Foreign Key ke SpicinessLevel
+  id               Int                @id @default(autoincrement())
+  quantity         Int
+  productName      String
+  price            Int
+  spicinessLabel   String
+  spicinessPrice   Int                @default(0)
+  note             String?
+  subtotal         Int
+  createdAt        DateTime           @default(now())
+  orderId          Int
+  productId        Int
   spicinessLevelId Int
-  spicinessLevel   SpicinessLevel @relation(fields: [spicinessLevelId], references: [id])
-
-  // Relasi: satu order item bisa punya banyak topping
-  toppings OrderItemTopping[]
+  toppings         OrderItemTopping[]
+  order            Order              @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product          Product            @relation(fields: [productId], references: [id])
+  spicinessLevel   SpicinessLevel     @relation(fields: [spicinessLevelId], references: [id])
 
   @@map("order_items")
 }
 
-// ============================================================
-// ORDER ITEM TOPPING (Pivot Table)
-// Topping yang dipilih untuk setiap order item (snapshot harga)
-// ============================================================
 model OrderItemTopping {
-  id          Int    @id @default(autoincrement())
-  toppingName String // snapshot nama topping
-  price       Int    // snapshot harga topping
-
-  // Foreign Key ke OrderItem
+  id          Int       @id @default(autoincrement())
+  toppingName String
+  price       Int
   orderItemId Int
+  toppingId   Int
   orderItem   OrderItem @relation(fields: [orderItemId], references: [id], onDelete: Cascade)
-
-  // Foreign Key ke Topping (referensi)
-  toppingId Int
-  topping   Topping @relation(fields: [toppingId], references: [id])
+  topping     Topping   @relation(fields: [toppingId], references: [id])
 
   @@map("order_item_toppings")
 }
-
